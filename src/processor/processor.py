@@ -14,7 +14,7 @@ class Processor():
         self.__ids = None
 
 
-    def _merge_id(self, data):
+    def _merge_id(self, data, for_annotation=False, other_data=None):
         if self.__ids is not None:
             new_ids_df = self.__ids.copy()
             new_ids_df = new_ids_df.iloc[:, :2]
@@ -36,11 +36,17 @@ class Processor():
         new_ids_df.set_index('From', inplace=True)
 
         data = data.merge(new_ids_df, how='left', left_on = data.columns[0], right_index=True)
+        # if for_annotation:
+#             data = data[data['Entry'].isin(other_data.index)]
+#         print(len(data), data.head())
+#         print('No Id mapping data: ', np.sum(np.sum(data[['From', 'Entry']].isnull())))
+        data[['From', 'Entry']]=data[['From', 'Entry']].fillna(axis=1, method='ffill')
+#         print('After fillna: ', np.sum(np.sum(data[['From', 'Entry']].isnull())))
         col_to_drop = data.columns[0]
         data.drop([col_to_drop], axis=1, inplace=True)
-        for name in data.columns:
-            if name[-2] == '_':
-                data.rename(columns={name:name[:-2]}, inplace=True)
+        # for name in data.columns:
+#             if name[-2] == '_':
+#                 data.rename(columns={name:name[:-2]}, inplace=True)
         data.set_index('Entry', inplace=True)
         # print(data.head())
         print('Id mapping is done') #To do
@@ -60,7 +66,8 @@ class Processor():
                 annotation_surface.to_csv(retrieved_path+'/annotation_surface.tsv', sep='\t', index=False)
             annotation_surface['Add'] = 1
             annotation_surface = annotation_surface[['Entry', 'Add']]
-        annotation_surface = self._merge_id(annotation_surface)
+        annotation_surface.columns = ['From', 'Add']
+        annotation_surface = self._merge_id(annotation_surface, True, data)
         annotation_surface.reset_index(inplace=True)
             
         if self.__user_input_reader.get_annotation_cyto_filename() is not None: # use local annotation file
@@ -74,7 +81,8 @@ class Processor():
                 annotation_cyto.to_csv(retrieved_path+'/annotation_cyto.tsv', sep='\t', index=False)
             annotation_cyto['Add'] = 1
             annotation_cyto = annotation_cyto[['Entry', 'Add']]
-        annotation_cyto = self._merge_id(annotation_cyto)
+        annotation_cyto.columns = ['From', 'Add']
+        annotation_cyto = self._merge_id(annotation_cyto, True, data)
         annotation_cyto.reset_index(inplace=True)
             
         annotation_surface.drop_duplicates(keep='first', inplace=True)
@@ -189,7 +197,9 @@ class Processor():
     def analyze(self):
         num_conditions = self.__user_input_reader.get_num_conditions()
         data = self.__user_input_reader.get_mass_data()
-        parent_path = os.path.join(self.__user_input_reader.get_output_directory(), str(datetime.now()).replace(':','-'))
+        id_col = data.columns[0]
+        data.rename(columns={id_col: 'From'}, inplace=True)
+        parent_path = os.path.join(self.__user_input_reader.get_output_directory(), str(datetime.now()).replace(':','-').replace(' ','_'))
         
         if self.__user_input_reader.get_save():
             retrieved_path = os.path.join(parent_path, "retrieved_data")

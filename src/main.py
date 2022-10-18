@@ -1,6 +1,6 @@
 import argparse
 import os
-import time
+from datetime import datetime
 from datamanagement.uniprotcommunicator import UniProtCommunicator
 from datamanagement.userinputreader import UserInputReader
 from processor.processor import Processor
@@ -21,7 +21,7 @@ def main():
 
     args = parser.parse_args()
 
-    start_time = time.time()
+    start_time = datetime.now()
 
     mass_filename = args.mass
     num_controls = args.controls
@@ -33,6 +33,12 @@ def main():
     annotation_surface_filename = args.surface
     annotation_cyto_filename = args.cyto
     save = args.save
+    
+    try:
+        assert(num_controls>=1 and num_replicates>=1 and num_conditions>=1 and tolerance>=0), 'Controls, replicates, (conditions) should not be less than 1, and tolerance should not be less than 0.'
+    except AssertionError as e:
+        print('Stopped!', e)
+        return
 
     print('Analysis starts...')
     user_input_reader = UserInputReader(mass_filename, num_controls, num_replicates, output_directory, num_conditions, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, save)
@@ -40,9 +46,8 @@ def main():
     processor = Processor(user_input_reader, uniprot_communicator)
     processor.analyze()
 
-    min, sec = divmod(time.time() - start_time, 60)
-    hrs, min = divmod(min, 60)
-    print(f'Analysis finished! time: {round(hrs)}:{round(min)}:{sec}')
+    end_time = datetime.now()
+    print(f'Analysis finished! time: {end_time - start_time}')
     
 
 if __name__ == "__main__":
