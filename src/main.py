@@ -1,23 +1,23 @@
 import argparse
 import os
 from datetime import datetime
-from datamanagement.uniprotcommunicator import UniProtCommunicator
-from datamanagement.userinputreader import UserInputReader
-from processor.processor import Processor
+from datamanagement.cliuniprotcommunicator import CliUniProtCommunicator
+from datamanagement.cliuserinputreader import CliUserInputReader
+from processors.cliprocessor import CliProcessor
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("mass", help="mass spec data directory including filename")
+    parser.add_argument("mass", help="mass spec data directory including filename, e.g. data/mass_spec_data.tsv")
     parser.add_argument("controls", type=int, help="number of controls for each condition")
     parser.add_argument("replicates", type=int, help="number of replicates for each control")
     parser.add_argument("-t", "--tolerance", type=int, help="tolerance of non-included")
     parser.add_argument("-o", "--output", help=" directory to store output results")
     parser.add_argument("-c", "--conditions", type=int, help="number of conditions")
-    parser.add_argument("-i", "--ids", help="latest_ids file directory including filename")
-    parser.add_argument("-u", "--surface", help="annotation_surface file directory including filename")
-    parser.add_argument("-y", "--cyto", help="annotation_cyto file directory including filename")
-    parser.add_argument("-s", "--save", action="store_true", help="save the data retrieved from UniProt, true if specified")
+    parser.add_argument("-i", "--ids", help="latest_ids file directory including filename, e.g. data/id_mapping.tsv")
+    parser.add_argument("-u", "--surface", help="annotation_surface file directory including filename, e.g. data/annotation_surface.tsv")
+    parser.add_argument("-y", "--cyto", help="annotation_cyto file directory including filename, e.g. data/annotation_cyto.tsv")
+    parser.add_argument("-a", "--cache", action="store_true", help="save the data retrieved from UniProt, true if specified")
 
     args = parser.parse_args()
 
@@ -32,7 +32,7 @@ def main():
     ids_filename = args.ids 
     annotation_surface_filename = args.surface
     annotation_cyto_filename = args.cyto
-    save = args.save
+    cache = args.cache
     
     try:
         assert(num_controls>=1 and num_replicates>=1 and num_conditions>=1 and tolerance>=0), 'Controls, replicates, (conditions) should not be less than 1, and tolerance should not be less than 0.'
@@ -41,10 +41,10 @@ def main():
         return
 
     print('Analysis starts...')
-    user_input_reader = UserInputReader(mass_filename, num_controls, num_replicates, output_directory, num_conditions, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, save)
-    uniprot_communicator = UniProtCommunicator()
-    processor = Processor(user_input_reader, uniprot_communicator)
-    processor.analyze()
+    user_input_reader = CliUserInputReader(mass_filename, num_controls, num_replicates, output_directory, num_conditions, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache)
+    uniprot_communicator = CliUniProtCommunicator(cache)
+    processor = CliProcessor(user_input_reader, uniprot_communicator)
+    processor.start()
 
     end_time = datetime.now()
     print(f'Analysis finished! time: {end_time - start_time}')
