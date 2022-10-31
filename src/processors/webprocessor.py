@@ -3,6 +3,10 @@ from processors.processor import Processor
 import os
 import shutil
 import uuid
+import logging
+
+logger = logging.getLogger('peeling')
+
 
 class WebProcessor(Processor):
     def __init__(self, user_input_reader, uniprot_communicator):
@@ -46,7 +50,7 @@ class WebProcessor(Processor):
         parent_path = self._construct_path()
         self._analyze(data, parent_path)
         self._write_args(parent_path)
-        print(f'Results saved at {parent_path}')
+        logger.info(f'Results saved at {parent_path}')
         shutil.make_archive(f'../results/{self.__uuid}', 'tar', root_dir=f'../results/{self.__uuid}')
         shutil.rmtree(f'../results/{self.__uuid}')
         return  self.__uuid

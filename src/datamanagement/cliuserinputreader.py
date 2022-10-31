@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 from datamanagement.userinputreader import UserInputReader
+import logging
+
+logger = logging.getLogger('peeling')
+
 
 class CliUserInputReader(UserInputReader):
     def __init__(self, mass_filename, num_controls, num_replicates, output_directory, num_conditions, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache):
@@ -17,8 +21,8 @@ class CliUserInputReader(UserInputReader):
         try:
             df = pd.read_table(filename, sep='\t', header=0)
         except UnicodeDecodeError as e1:
-            print('Stopped!', e1) #To do: replace print with log
-            print('Check the input file is tab delimited (.tsv)')
+            logger.error('Stopped!', e1) #To do: replace print with log
+            logger.error('Check the input file is tab delimited (.tsv)')
             return
         except FileNotFoundError as e2:
             print(e2)
@@ -32,7 +36,7 @@ class CliUserInputReader(UserInputReader):
     def get_mass_data(self):
         data = self.__read_file(self.__mass_filename)
         self._check_mass_spec_file(data)
-        print('Read in %d rows and %d columns from mass spec data' % data.shape)
+        logger.info('Read in %d rows and %d columns from mass spec data' % data.shape)
         return data
     
 
@@ -55,19 +59,19 @@ class CliUserInputReader(UserInputReader):
 
     def get_latest_ids(self):
         df = self.__read_file(self.__ids_filename)
-        print('Read in %d rows from latest_ids file' % (len(df)))
+        logger.info('Read in %d rows from latest_ids file' % (len(df)))
         return df
        
 
     def get_annotation_surface(self):
         df = self.__read_file(self.__annotation_surface_filename)
-        print('Read in %d rows from annotation_surface file' % (len(df)))
+        logger.info('Read in %d rows from annotation_surface file' % (len(df)))
         return df
        
 
     def get_annotation_cyto(self):
         df = self.__read_file(self.__annotation_cyto_filename)
-        print('Read in %d rows from annotation_cyto file' % (len(df)))
+        logger.info('Read in %d rows from annotation_cyto file' % (len(df)))
         return df
 
     

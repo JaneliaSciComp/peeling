@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+import logging
+
+logger = logging.getLogger('peeling')
 
 
 class UserInputReader(ABC):
@@ -13,7 +16,7 @@ class UserInputReader(ABC):
         try:
             assert(len(df) >= 1), 'The file is empty'
         except AssertionError as e:
-            print('Stopped!', e)
+            logger.error('Stopped!', e)
             return
     
 
@@ -21,8 +24,8 @@ class UserInputReader(ABC):
         try:
             assert(df.shape[1] == self.__num_conditions * self.__num_controls * self.__num_replicates + 1), 'The number of columns does not match the input numbers'
         except AssertionError as e:
-            print('Stopped!', e)
-            print('Check the input file is tab delimited (.tsv) and has correct data')
+            logger.error('Stopped!', e)
+            logger.error('Check the input file is tab delimited (.tsv) and has correct data')
             return
     
 

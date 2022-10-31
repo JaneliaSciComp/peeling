@@ -1,9 +1,13 @@
+from asyncio.log import logger
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import auc
 import os
 from abc import ABC, abstractmethod
+import logging
+
+logger = logging.getLogger('peeling')
 
 
 class Processor(ABC):
@@ -23,7 +27,7 @@ class Processor(ABC):
 
 
     def __merge_id(self, mass_data, id_mapping_data):
-        print(id_mapping_data.head())
+        logger.debug(f'\n{id_mapping_data.head()}')
         id_mapping_data.drop_duplicates(subset=['From'], keep='first', inplace=True)
         id_mapping_data.set_index('From', inplace=True)
 
@@ -31,13 +35,14 @@ class Processor(ABC):
         id_mapping_data.reset_index(inplace=True)
         # if for_annotation:
 #             data = data[data['Entry'].isin(other_data.index)]
-        print(len(mass_data), mass_data.head())
-        print('No Id mapping data: ', np.sum(np.sum(mass_data[['From', 'Entry']].isnull())))
+        logger.debug(f'len(mass_data): {len(mass_data)}')
+        logger.debug(f'\n{mass_data.head()}')
+        logger.debug(f"No Id mapping data: {np.sum(np.sum(mass_data[['From', 'Entry']].isnull()))}")
         mass_data[['From', 'Entry']]=mass_data[['From', 'Entry']].fillna(axis=1, method='ffill')
-        print('After fillna: ', np.sum(np.sum(mass_data[['From', 'Entry']].isnull())))
+        logger.debug(f"After fillna: {np.sum(np.sum(mass_data[['From', 'Entry']].isnull()))}")
         mass_data.drop([mass_data.columns[0]], axis=1, inplace=True)
         mass_data.set_index('Entry', inplace=True)
-        print('Id mapping is done') #To do
+        logger.info('Id mapping is done') #To do
         return mass_data
     
 
@@ -62,7 +67,7 @@ class Processor(ABC):
         mass_data.rename(columns={'Add': new_col_name}, inplace=True)
         
         mass_data[new_col_name] = mass_data[new_col_name].fillna(0)
-        print(f'Adding annotation_{type} is done.') #To do
+        logger.info(f'Adding annotation_{type} is done.') #To do
         return mass_data
     
 
@@ -154,7 +159,7 @@ class Processor(ABC):
         
         surface_proteins = pd.DataFrame(data[data[col_name] >= threshold].index).dropna(axis=0, how='any')
         surface_proteins.drop_duplicates(keep='first', inplace=True)
-        print(f'Condition {condition}: {len(surface_proteins)} surface proteins found')
+        logger.info(f'Condition {condition}: {len(surface_proteins)} surface proteins found')
         surface_proteins.to_csv(f'{path}/surface_proteins.tsv', sep='\t', index=False)
         #print(f'Results of condition{condition} are saved at {path}')
         

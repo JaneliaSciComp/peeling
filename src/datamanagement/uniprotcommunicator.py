@@ -7,6 +7,9 @@ from requests.adapters import HTTPAdapter, Retry
 import csv
 import pandas as pd
 from abc import ABC, abstractmethod
+import logging
+
+logger = logging.getLogger('peeling')
 
 
 POLLING_INTERVAL = 3
@@ -133,19 +136,19 @@ class UniProtCommunicator(ABC):
 
     def _retrieve_latest_id(self, old_ids):
         try:
-            print('Communicating with UniProt for id mapping...') #To do
+            logger.info('Communicating with UniProt for id mapping...')
             job_id = self.__submit_id_mapping(old_ids)
             if self.__check_id_mapping_results_ready(job_id):
                 link = self.__get_id_mapping_results_link(job_id)
             results = self.__get_id_mapping_results_search(link)
             results_df = self.__get_data_frame_from_tsv_results(results)
-            print('retrieved: ', len(results_df))
+            logger.debug(f'retrieved: {len(results_df)}')
             if not self.__save and len(results_df)>0:
                 results_df = results_df[['From', 'Entry']]
             return results_df
         except Exception as e:
-            print(e)
-            print('Retry _retrieve_latest_id()')
+            logger.error(e)
+            logger.error('Retry _retrieve_latest_id()')
             self._retrieve_latest_id()
 
 
@@ -156,27 +159,27 @@ class UniProtCommunicator(ABC):
     
     def _retrieve_annotation_surface(self):
         try:
-            print('Retrieving annotation_surface file from UniProt...') #To do
+            logger.info('Retrieving annotation_surface file from UniProt...') #To do
             url = SURFACE_URL_CACHE if self.__save else SURFACE_URL
             results = self.__get_annotation_results_search(url)
             results = self.__get_data_frame_from_tsv_results(results)
             return results
         except Exception as e:
-            print(e)
-            print('Retry _retrieve_annotation_surface()')
+            logger.error(e)
+            logger.error('Retry _retrieve_annotation_surface()')
             self._retrieve_annotation_surface()   
 
 
     def _retrieve_annotation_cyto(self):
         try:
-            print('Retrieving annotation_cyto file from UniProt...') #To do
+            logger.info('Retrieving annotation_cyto file from UniProt...') #To do
             url = CYTO_URL_CACHE if self.__save else CYTO_URL
             results = self.__get_annotation_results_search(url)
             results = self.__get_data_frame_from_tsv_results(results)
             return results
         except Exception as e:
-            print(e)
-            print('Retry _retrieve_annotation_cyto()')
+            logger.error(e)
+            logger.error('Retry _retrieve_annotation_cyto()')
             self._retrieve_annotation_cyto()
 
 

@@ -2,6 +2,9 @@ from processors.processor import Processor
 import os
 from datetime import datetime
 import pandas as pd
+import logging
+
+logger = logging.getLogger('peeling')
 
 
 class CliProcessor(Processor):
@@ -42,25 +45,21 @@ class CliProcessor(Processor):
             if self._get_user_input_reader().get_annotation_surface_filename() is not None: # use local annotation file
                 annotation = self._get_user_input_reader().get_annotation_surface() # the first column should be ids
                 annotation = pd.DataFrame(annotation.iloc[:, 0])
-                #annotation_surface['Add'] = 1
             else: # retrieve annotation file from UniProt
                 annotation = self._get_uniprot_communicator().get_annotation_surface()
                 annotation.dropna(subset=['Entry'], axis=0, how='any', inplace=True)
                 if self._get_user_input_reader().get_save():
                     annotation.to_csv(f'{self.__path}/annotation_surface.tsv', sep='\t', index=False)
-                #annotation_surface['Add'] = 1
                 annotation = annotation[['Entry']]
         else:
             if self._get_user_input_reader().get_annotation_cyto_filename() is not None: # use local annotation file
                 annotation = self._get_user_input_reader().get_annotation_cyto() # the first column should be ids
                 annotation = pd.DataFrame(annotation.iloc[:, 0])
-                #annotation_surface['Add'] = 1
             else: # retrieve annotation file from UniProt
                 annotation = self._get_uniprot_communicator().get_annotation_cyto()
                 annotation.dropna(subset=['Entry'], axis=0, how='any', inplace=True)
                 if self._get_user_input_reader().get_save():
                     annotation.to_csv(f'{self.__path}/annotation_cyto.tsv', sep='\t', index=False)
-                #annotation_surface['Add'] = 1
                 annotation = annotation[['Entry']]
         annotation.columns = ['From']
         return annotation
@@ -74,7 +73,7 @@ class CliProcessor(Processor):
             try: 
                 os.makedirs(retrieved_path, exist_ok=True) 
             except OSError as error: 
-                print(error)
+                logger.error(error)
         else:
             retrieved_path = None
         self.__path = retrieved_path
@@ -101,6 +100,6 @@ class CliProcessor(Processor):
         parent_path = self._construct_path()
         self._analyze(data, parent_path)
         self._write_args(parent_path)
-        print(f'Results saved at {parent_path}')
+        logger.info(f'Results saved at {parent_path}')
 
    

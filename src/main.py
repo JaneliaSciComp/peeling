@@ -1,9 +1,17 @@
 import argparse
 import os
 from datetime import datetime
+import logging
 from datamanagement.cliuniprotcommunicator import CliUniProtCommunicator
 from datamanagement.cliuserinputreader import CliUserInputReader
 from processors.cliprocessor import CliProcessor
+
+logger = logging.getLogger('peeling')
+#TODO: set level based on verbose option
+logger.setLevel(logging.INFO)
+log_handler = logging.StreamHandler()
+log_handler.setFormatter(logging.Formatter('%(asctime)s | %(levelname)s: %(message)s'))
+logger.addHandler(log_handler)
 
 
 def main():
@@ -37,17 +45,17 @@ def main():
     try:
         assert(num_controls>=1 and num_replicates>=1 and num_conditions>=1 and tolerance>=0), 'Controls, replicates, (conditions) should not be less than 1, and tolerance should not be less than 0.'
     except AssertionError as e:
-        print('Stopped!', e)
+        logger.error('Stopped!', e)
         return
 
-    print('Analysis starts...')
+    logger.info(f'{start_time} Analysis starts...')
     user_input_reader = CliUserInputReader(mass_filename, num_controls, num_replicates, output_directory, num_conditions, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache)
     uniprot_communicator = CliUniProtCommunicator(cache)
     processor = CliProcessor(user_input_reader, uniprot_communicator)
     processor.start()
 
     end_time = datetime.now()
-    print(f'Analysis finished! time: {end_time - start_time}')
+    logger.info(f'{end_time} Analysis finished! Time: {end_time - start_time}')
     
 
 if __name__ == "__main__":

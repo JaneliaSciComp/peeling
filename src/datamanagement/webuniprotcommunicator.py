@@ -1,6 +1,10 @@
 from datamanagement.uniprotcommunicator import UniProtCommunicator
 import pandas as pd
 from datetime import datetime
+import logging
+
+logger = logging.getLogger('peeling')
+
 
 class WebUniProtCommunicator(UniProtCommunicator):
     def __init__(self, cache=False):
@@ -27,14 +31,14 @@ class WebUniProtCommunicator(UniProtCommunicator):
             else:
                 old_ids_set = set(old_ids)
                 saved_ids_set = set(self.__ids['From'])
-                print('before retrieve: ', len(self.__ids))
+                logger.info(f'before retrieve: {len(self.__ids)}')
                 to_retrieve = old_ids_set.difference(saved_ids_set)
-                print('to retrieve: ', len(to_retrieve), to_retrieve)
+                logger.info(f'to retrieve: {len(to_retrieve)}, {to_retrieve}')
                 
                 if len(to_retrieve) > 0:
                     retrieved_data = self._retrieve_latest_id(list(to_retrieve))
                     self.__ids = pd.concat([self.__ids, retrieved_data])
-                print('after concat: ', len(self.__ids))
+                logger.debug(f'after concat: {len(self.__ids)}')
             return self.__ids[self.__ids['From'].isin(old_ids)]
         else: #for merge annotation
             return self.__ids
@@ -43,19 +47,19 @@ class WebUniProtCommunicator(UniProtCommunicator):
     # overriding super class method
     def _retrieve_annotation_surface(self):
         #TODO
-        results = super()._retrieve_annotation_surface()
-        self.__annotation_surface = results
-        # self.__annotation_surface = pd.read_table('../retrieved_data/annotation_surface.tsv', sep='\t')
-        # self.__annotation_surface = self.__annotation_surface[['Entry']]
+        # results = super()._retrieve_annotation_surface()
+        # self.__annotation_surface = results
+        self.__annotation_surface = pd.read_table('../retrieved_data/annotation_surface.tsv', sep='\t')
+        self.__annotation_surface = self.__annotation_surface[['Entry']]
     
 
     # overriding super class method
     def _retrieve_annotation_cyto(self):
         #TODO
-        results = super()._retrieve_annotation_cyto()
-        self.__annotation_cyto = results
-        # self.__annotation_cyto = pd.read_table('../retrieved_data/annotation_cyto.tsv', sep='\t')
-        # self.__annotation_cyto = self.__annotation_cyto[['Entry']]
+        # results = super()._retrieve_annotation_cyto()
+        # self.__annotation_cyto = results
+        self.__annotation_cyto = pd.read_table('../retrieved_data/annotation_cyto.tsv', sep='\t')
+        self.__annotation_cyto = self.__annotation_cyto[['Entry']]
 
 
     # overriding abstract method
@@ -70,13 +74,13 @@ class WebUniProtCommunicator(UniProtCommunicator):
 
     def update_data(self):
         start_time = datetime.now()
-        print('Updating data. ', start_time)
+        logger.info('Updating data...')
         if self.__ids is not None:
             updated_ids = self._retrieve_latest_id(list(self.__ids['From']))
             num_diff = len(set(updated_ids['Entry']).difference(set(self.__ids['Entry'])))
-            print(f'{num_diff} ids are updated')
+            logger.info(f'{num_diff} ids are updated')
             self.__ids = updated_ids
         self._retrieve_annotation_surface()
         self._retrieve_annotation_cyto()
         end_time = datetime.now()
-        print('Update is done.', end_time-start_time)
+        logger.info(f'Update is done. Time: {end_time-start_time}')
