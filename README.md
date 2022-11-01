@@ -30,8 +30,8 @@ The basic usage will communicate with the UniProt website to map the IDs to the 
 
 Therefore, it is recommended to save the retrieved data when first time run it, and use the locally saved data for the following runs, which will reduce the run time to seconds. Remember to update the retrieved data periodically.
 ```
-# To save the retrieved data, specify -s/--save
-python3 main.py mass_spec_filename num_of_controls num_of_replicates --save
+# To save the retrieved data, specify -a/--cache
+python3 main.py mass_spec_filename num_of_controls num_of_replicates --cache
 
 # To use locally saved data, specify the directories
 python3 main.py mass_spec_filename num_of_controls num_of_replicates --ids latest_ids_dir --surface annotation_surface_dir --cyto annotation_cyto_dir
@@ -52,5 +52,5 @@ python3 main.py mass_spec_filename num_of_controls num_of_replicates --ids lates
 
 -y, --cyto    Annotation_cyto file directory including filename
 
--s, --save    Save the data retrieved from UniProt, true if specified
+-a, --cache    Save the data retrieved from UniProt on the local computer, true if specified
 
