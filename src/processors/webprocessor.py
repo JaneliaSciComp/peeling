@@ -1,4 +1,4 @@
-from multiprocessing import parent_process
+#from multiprocessing import parent_process
 from processors.processor import Processor
 import os
 import shutil
@@ -52,7 +52,7 @@ class WebProcessor(Processor):
         self._write_args(parent_path)
         logger.info(f'Results saved at {parent_path}')
         shutil.make_archive(f'../results/{self.__uuid}', 'tar', root_dir=f'../results/{self.__uuid}')
-        shutil.rmtree(f'../results/{self.__uuid}')
+        #shutil.rmtree(f'../results/{self.__uuid}')
         return  self.__uuid
 
 

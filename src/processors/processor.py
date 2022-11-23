@@ -1,4 +1,4 @@
-from asyncio.log import logger
+#from asyncio.log import logger
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -100,7 +100,7 @@ class Processor(ABC):
         data[col_list].plot(use_index=False, xticks = []) 
         
         plt.title('TPR, FPR, TPR-FPR_'+col_list[0][4:])
-        plt.savefig(f'{output_dir}/TPR_FPR_{col_list[0][4:]}.pdf')
+        plt.savefig(f'{output_dir}/TPR_FPR_{col_list[0][4:]}.{self.__user_input_reader.get_plot_format()}') #TODO
         plt.close()
     
 
@@ -132,7 +132,7 @@ class Processor(ABC):
         plt.text(0, 0.9, 'AUC = ' + str(round(auc(data.iloc[:, -3], data.iloc[:, -4]), 2)))
         plt.plot(cutoff_fpr, cutoff_tpr, marker='o', color='r')
         ax.annotate('Cut-off Point\nFPR='+str(round(cutoff_fpr,3))+'\nTPR='+str(round(cutoff_tpr,3)), (cutoff_fpr+0.05, cutoff_tpr-0.15))
-        plt.savefig(f'{output_dir}/ROC_{data.columns[-3][4:]}.pdf')
+        plt.savefig(f'{output_dir}/ROC_{data.columns[-3][4:]}.{self.__user_input_reader.get_plot_format()}') #TODO
         plt.close()
     
 
@@ -170,6 +170,8 @@ class Processor(ABC):
 
 
     def _analyze(self, data, parent_path):
+        formats = plt.gcf().canvas.get_supported_filetypes()
+        print(type(formats), formats)
         num_conditions = self.__user_input_reader.get_num_conditions()
         id_col = data.columns[0]
         data.rename(columns={id_col: 'From'}, inplace=True)

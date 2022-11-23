@@ -7,8 +7,8 @@ logger = logging.getLogger('peeling')
 
 
 class CliUserInputReader(UserInputReader):
-    def __init__(self, mass_filename, num_controls, num_replicates, output_directory, num_conditions, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache):
-        super().__init__(num_controls, num_replicates, num_conditions, tolerance)
+    def __init__(self, mass_filename, num_controls, num_replicates, output_directory, num_conditions, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache, plot_format):
+        super().__init__(num_controls, num_replicates, num_conditions, tolerance, plot_format)
         self.__mass_filename = mass_filename
         self.__output_directory = output_directory
         self.__ids_filename = ids_filename
@@ -32,7 +32,7 @@ class CliUserInputReader(UserInputReader):
         return df
 
 
-    # overriding abstract method
+    # implement abstract method
     def get_mass_data(self):
         data = self.__read_file(self.__mass_filename)
         self._check_mass_spec_file(data)
@@ -40,7 +40,7 @@ class CliUserInputReader(UserInputReader):
         return data
     
 
-    # overriding abstract method
+    # implement abstract method
     def get_mass_spec_filename(self):
         return self.__mass_filename
     

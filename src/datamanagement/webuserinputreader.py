@@ -8,8 +8,8 @@ logger = logging.getLogger('peeling')
 
 
 class WebUserInputReader(UserInputReader):
-    def __init__(self, mass_file:UploadFile, num_controls, num_replicates, num_conditions, tolerance): #, ids_file, annotation_surface_file, annotation_cyto_file
-        super().__init__(num_controls, num_replicates, num_conditions, tolerance)
+    def __init__(self, mass_file:UploadFile, num_controls, num_replicates, num_conditions, tolerance, plot_format): #, ids_file, annotation_surface_file, annotation_cyto_file
+        super().__init__(num_controls, num_replicates, num_conditions, tolerance, plot_format)
         self.__mass_file = mass_file
     
 
@@ -23,7 +23,7 @@ class WebUserInputReader(UserInputReader):
         return df
 
 
-    # overriding abstract method
+    # implement abstract method
     async def get_mass_data(self):
         data = await self.__decode_uploadFile()
         self._check_mass_spec_file(data)
@@ -31,7 +31,7 @@ class WebUserInputReader(UserInputReader):
         return data
     
 
-    # overriding abstract method
+    # implement abstract method
     def get_mass_spec_filename(self):
         return self.__mass_file.filename
     

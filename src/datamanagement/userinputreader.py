@@ -5,11 +5,12 @@ logger = logging.getLogger('peeling')
 
 
 class UserInputReader(ABC):
-    def __init__(self, num_controls, num_replicates, num_conditions, tolerance):
+    def __init__(self, num_controls, num_replicates, num_conditions, tolerance, plot_format):
         self.__num_conditions = num_conditions
         self.__num_controls = num_controls
         self.__num_replicates = num_replicates
         self.__tolerance = tolerance
+        self.__plot_format = plot_format
 
     
     def _check_file(self, df):
@@ -53,6 +54,10 @@ class UserInputReader(ABC):
 
     def get_tolerance(self):
         return self.__tolerance
+    
+
+    def get_plot_format(self):
+        return self.__plot_format
     
     
     

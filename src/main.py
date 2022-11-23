@@ -19,13 +19,14 @@ def main():
     parser.add_argument("mass", help="mass spec data directory including filename, e.g. data/mass_spec_data.tsv")
     parser.add_argument("controls", type=int, help="number of controls for each condition")
     parser.add_argument("replicates", type=int, help="number of replicates for each control")
-    parser.add_argument("-t", "--tolerance", type=int, help="tolerance of non-included")
+    parser.add_argument("-t", "--tolerance", type=int, help="tolerance of non-included, default is 0")
     parser.add_argument("-o", "--output", help=" directory to store output results")
     parser.add_argument("-c", "--conditions", type=int, help="number of conditions")
     parser.add_argument("-i", "--ids", help="latest_ids file directory including filename, e.g. data/id_mapping.tsv")
     parser.add_argument("-u", "--surface", help="annotation_surface file directory including filename, e.g. data/annotation_surface.tsv")
     parser.add_argument("-y", "--cyto", help="annotation_cyto file directory including filename, e.g. data/annotation_cyto.tsv")
     parser.add_argument("-a", "--cache", action="store_true", help="save the data retrieved from UniProt, true if specified")
+    parser.add_argument("-p", "--plot", choices=['pdf', 'png', 'svg', 'jpg', 'jpeg'], help="the output format of plots, default is pdf") #TODO
 
     args = parser.parse_args()
 
@@ -41,6 +42,7 @@ def main():
     annotation_surface_filename = args.surface
     annotation_cyto_filename = args.cyto
     cache = args.cache
+    plot_format = args.plot if args.plot is not None else ''
     
     try:
         assert(num_controls>=1 and num_replicates>=1 and num_conditions>=1 and tolerance>=0), 'Controls, replicates, (conditions) should not be less than 1, and tolerance should not be less than 0.'
@@ -49,7 +51,7 @@ def main():
         return
 
     logger.info(f'{start_time} Analysis starts...')
-    user_input_reader = CliUserInputReader(mass_filename, num_controls, num_replicates, output_directory, num_conditions, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache)
+    user_input_reader = CliUserInputReader(mass_filename, num_controls, num_replicates, output_directory, num_conditions, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache, plot_format)
     uniprot_communicator = CliUniProtCommunicator(cache)
     processor = CliProcessor(user_input_reader, uniprot_communicator)
     processor.start()
