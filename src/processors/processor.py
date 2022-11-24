@@ -143,7 +143,7 @@ class Processor(ABC):
         return plt, fig_name
     
 
-    def __get_surface_proteins(self, data, condition, path, plots_path):
+    def __get_surface_proteins(self, data, path, plots_path):
         '''
         If a protein is included in at least num_ctrl * num_rep - tolerance columns, output it as surface protein
         
@@ -151,7 +151,7 @@ class Processor(ABC):
         Accession ids of the surface proteins
         '''
         total_col = self.__user_input_reader.get_num_controls() * self.__user_input_reader.get_num_replicates()
-        start_col = total_col * (self.__user_input_reader.get_num_conditions() - 1)
+        start_col = 0 #total_col * (self.__user_input_reader.get_num_conditions() - 1)
         threshold = total_col - self.__user_input_reader.get_tolerance()
         
         for i in range(start_col, start_col + total_col):
@@ -163,14 +163,13 @@ class Processor(ABC):
             self._plot_supplemental(plt, fig_name)
             data.drop(data.columns[-4:-1], axis=1, inplace=True)
         
-        col_name = 'include_sum_' + str(condition)
+        col_name = 'include_sum'
         data[col_name] = data.iloc[:, -total_col:].sum(axis=1)
         
         surface_proteins = pd.DataFrame(data[data[col_name] >= threshold].index).dropna(axis=0, how='any')
         surface_proteins.drop_duplicates(keep='first', inplace=True)
-        logger.info(f'Condition {condition}: {len(surface_proteins)} surface proteins found')
+        logger.info(f'{len(surface_proteins)} surface proteins found')
         surface_proteins.to_csv(f'{path}/surface_proteins.tsv', sep='\t', index=False)
-        #print(f'Results of condition{condition} are saved at {path}')
         
 
     @abstractmethod
@@ -179,7 +178,7 @@ class Processor(ABC):
 
 
     def _analyze(self, data, parent_path):
-        num_conditions = self.__user_input_reader.get_num_conditions()
+       # num_conditions = self.__user_input_reader.get_num_conditions()
         id_col = data.columns[0]
         data.rename(columns={id_col: 'From'}, inplace=True)
         
@@ -191,15 +190,13 @@ class Processor(ABC):
         annotation_cyto = self._get_annotation_data('cyto')
         data = self.__merge_annotation(data, annotation_cyto, id_mapping_data, 'cyto')
         
-        for i in range(1, num_conditions+1):
-            path = os.path.join(parent_path, "condition" + str(i))
-            plots_path = os.path.join(path, "plots") 
-            try: 
-                os.makedirs(plots_path) 
-            except OSError as error: 
-                logger.debug(error)
-            
-            self.__get_surface_proteins(data, i, path, plots_path)
+        plots_path = os.path.join(parent_path, "plots") 
+        try: 
+            os.makedirs(plots_path) 
+        except OSError as error: 
+            logger.debug(error)
+        
+        self.__get_surface_proteins(data, parent_path, plots_path)
     
 
     def _write_args(self, path):
@@ -207,7 +204,6 @@ class Processor(ABC):
             f.write('Mass spec file: ' + str(self.__user_input_reader.get_mass_spec_filename()) + '\n')
             f.write(f'Number of controls: {self.__user_input_reader.get_num_controls()}\n')
             f.write(f'Number of replicates: {self.__user_input_reader.get_num_replicates()}\n')
-            f.write(f'Number of conditions: {self.__user_input_reader.get_num_conditions()}\n')
             f.write(f'Tolerance: {self.__user_input_reader.get_tolerance()}\n')
             f.write(f'Plot format: {self.__user_input_reader.get_plot_format()}\n')
 

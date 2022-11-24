@@ -7,8 +7,8 @@ logger = logging.getLogger('peeling')
 
 
 class CliUserInputReader(UserInputReader):
-    def __init__(self, mass_filename, num_controls, num_replicates, output_directory, num_conditions, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache, plot_format):
-        super().__init__(num_controls, num_replicates, num_conditions, tolerance, plot_format)
+    def __init__(self, mass_filename, num_controls, num_replicates, output_directory, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache, plot_format):
+        super().__init__(num_controls, num_replicates, tolerance, plot_format)
         self.__mass_filename = mass_filename
         self.__output_directory = output_directory
         self.__ids_filename = ids_filename
@@ -21,7 +21,7 @@ class CliUserInputReader(UserInputReader):
         try:
             df = pd.read_table(filename, sep='\t', header=0)
         except UnicodeDecodeError as e1:
-            logger.error('Stopped!', e1) #To do: replace print with log
+            logger.error('Stopped!', e1) 
             logger.error('Check the input file is tab delimited (.tsv)')
             return
         except FileNotFoundError as e2:
