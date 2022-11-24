@@ -100,8 +100,14 @@ class Processor(ABC):
         data[col_list].plot(use_index=False, xticks = []) 
         
         plt.title('TPR, FPR, TPR-FPR_'+col_list[0][4:])
-        plt.savefig(f'{output_dir}/TPR_FPR_{col_list[0][4:]}.{self.__user_input_reader.get_plot_format()}') #TODO
-        plt.close()
+        fig_name = f'TPR_FPR_{col_list[0][4:]}'
+        plt.savefig(f'{output_dir}/{fig_name}.{self.__user_input_reader.get_plot_format()}')
+        return plt, fig_name
+    
+
+    @abstractmethod
+    def _plot_supplemental(self, plt, fig_name):
+        raise NotImplemented()
     
 
     def __filter_by_max_TPR_FPR_diff(self, data):
@@ -132,8 +138,9 @@ class Processor(ABC):
         plt.text(0, 0.9, 'AUC = ' + str(round(auc(data.iloc[:, -3], data.iloc[:, -4]), 2)))
         plt.plot(cutoff_fpr, cutoff_tpr, marker='o', color='r')
         ax.annotate('Cut-off Point\nFPR='+str(round(cutoff_fpr,3))+'\nTPR='+str(round(cutoff_tpr,3)), (cutoff_fpr+0.05, cutoff_tpr-0.15))
-        plt.savefig(f'{output_dir}/ROC_{data.columns[-3][4:]}.{self.__user_input_reader.get_plot_format()}') #TODO
-        plt.close()
+        fig_name = f'ROC_{data.columns[-3][4:]}'
+        plt.savefig(f'{output_dir}/{fig_name}.{self.__user_input_reader.get_plot_format()}')
+        return plt, fig_name
     
 
     def __get_surface_proteins(self, data, condition, path, plots_path):
@@ -149,9 +156,11 @@ class Processor(ABC):
         
         for i in range(start_col, start_col + total_col):
             self.__calculate_TPR_FPR_diff(data, i)
-            self.__plot_line(data, plots_path)
+            plt, fig_name = self.__plot_line(data, plots_path)
+            self._plot_supplemental(plt, fig_name)
             cutoff_fpr, cutoff_tpr = self.__filter_by_max_TPR_FPR_diff(data)
-            self.__plot_roc(data, cutoff_fpr, cutoff_tpr, plots_path)
+            plt, fig_name = self.__plot_roc(data, cutoff_fpr, cutoff_tpr, plots_path)
+            self._plot_supplemental(plt, fig_name)
             data.drop(data.columns[-4:-1], axis=1, inplace=True)
         
         col_name = 'include_sum_' + str(condition)
@@ -170,8 +179,6 @@ class Processor(ABC):
 
 
     def _analyze(self, data, parent_path):
-        formats = plt.gcf().canvas.get_supported_filetypes()
-        print(type(formats), formats)
         num_conditions = self.__user_input_reader.get_num_conditions()
         id_col = data.columns[0]
         data.rename(columns={id_col: 'From'}, inplace=True)
@@ -190,7 +197,7 @@ class Processor(ABC):
             try: 
                 os.makedirs(plots_path) 
             except OSError as error: 
-                print(error)  #To do
+                logger.debug(error)
             
             self.__get_surface_proteins(data, i, path, plots_path)
     
@@ -202,6 +209,7 @@ class Processor(ABC):
             f.write(f'Number of replicates: {self.__user_input_reader.get_num_replicates()}\n')
             f.write(f'Number of conditions: {self.__user_input_reader.get_num_conditions()}\n')
             f.write(f'Tolerance: {self.__user_input_reader.get_tolerance()}\n')
+            f.write(f'Plot format: {self.__user_input_reader.get_plot_format()}\n')
 
 
     @abstractmethod

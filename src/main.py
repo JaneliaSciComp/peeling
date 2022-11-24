@@ -2,6 +2,7 @@ import argparse
 import os
 from datetime import datetime
 import logging
+import matplotlib.pyplot as plt
 from datamanagement.cliuniprotcommunicator import CliUniProtCommunicator
 from datamanagement.cliuserinputreader import CliUserInputReader
 from processors.cliprocessor import CliProcessor
@@ -26,7 +27,7 @@ def main():
     parser.add_argument("-u", "--surface", help="annotation_surface file directory including filename, e.g. data/annotation_surface.tsv")
     parser.add_argument("-y", "--cyto", help="annotation_cyto file directory including filename, e.g. data/annotation_cyto.tsv")
     parser.add_argument("-a", "--cache", action="store_true", help="save the data retrieved from UniProt, true if specified")
-    parser.add_argument("-p", "--plot", choices=['pdf', 'png', 'svg', 'jpg', 'jpeg'], help="the output format of plots, default is pdf") #TODO
+    parser.add_argument("-p", "--plot", choices=[list(plt.gcf().canvas.get_supported_filetypes().keys())], help="the output format of plots, default is png") #TODO
 
     args = parser.parse_args()
 
@@ -42,7 +43,7 @@ def main():
     annotation_surface_filename = args.surface
     annotation_cyto_filename = args.cyto
     cache = args.cache
-    plot_format = args.plot if args.plot is not None else ''
+    plot_format = args.plot if args.plot is not None else 'png'
     
     try:
         assert(num_controls>=1 and num_replicates>=1 and num_conditions>=1 and tolerance>=0), 'Controls, replicates, (conditions) should not be less than 1, and tolerance should not be less than 0.'

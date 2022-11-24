@@ -14,7 +14,7 @@ class CliProcessor(Processor):
         self.__path = None # path to save retrieved data
 
 
-    # overriding abstract method
+    # implement abstract method
     def _get_id_mapping_data(self, mass_data):
         if self._get_user_input_reader().get_latest_ids_filename() is not None:
             # read in local ids file
@@ -31,12 +31,12 @@ class CliProcessor(Processor):
         return self.__ids
 
 
-    # overriding abstract method
+    # implement abstract method
     def _get_id_mapping_data_annotation(self):
         return self.__ids
 
         
-    # overriding abstract method
+    # implement abstract method
     def _get_annotation_data(self, type):
         '''
         type: 'surface' or 'cyto'
@@ -65,7 +65,12 @@ class CliProcessor(Processor):
         return annotation
 
 
-    # overriding abstract method
+    # implement abstract method
+    def _plot_supplemental(self, plt, fig_name):
+        plt.close()
+
+
+    # implement abstract method
     def _construct_path(self):
         parent_path = os.path.join(self._get_user_input_reader().get_output_directory(), str(datetime.now()).replace(':','-').replace(' ','_'))
         if self._get_user_input_reader().get_save():
@@ -94,7 +99,7 @@ class CliProcessor(Processor):
                 f.write(f'Annotation_cyto file: {cyto}\n')
    
 
-    # overriding super class method
+    # implement abstract method
     def start(self):
         data = self._get_user_input_reader().get_mass_data()
         parent_path = self._construct_path()

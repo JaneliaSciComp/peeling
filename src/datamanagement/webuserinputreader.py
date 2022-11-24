@@ -13,6 +13,10 @@ class WebUserInputReader(UserInputReader):
         self.__mass_file = mass_file
     
 
+    #TODO
+    #def __check_input(self, n): #check plot format
+
+
     async def __decode_uploadFile(self):
         bytes = await self.__mass_file.read()
         lines = [line for line in bytes.decode("utf-8").split("\n") if line]
