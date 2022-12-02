@@ -17,14 +17,14 @@ logger.addHandler(log_handler)
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("mass", help="mass spec data directory including filename, e.g. data/mass_spec_data.tsv")
-    parser.add_argument("controls", type=int, help="number of controls for each condition")
+    parser.add_argument("mass", help="mass spec data directory, e.g. data/mass_spec_data.tsv")
+    parser.add_argument("controls", type=int, help="number of controls")
     parser.add_argument("replicates", type=int, help="number of replicates for each control")
     parser.add_argument("-t", "--tolerance", type=int, help="tolerance of non-included, default is 0")
     parser.add_argument("-o", "--output", help=" directory to store output results")
-    parser.add_argument("-i", "--ids", help="latest_ids file directory including filename, e.g. data/id_mapping.tsv")
-    parser.add_argument("-s", "--surface", help="annotation_surface file directory including filename, e.g. data/annotation_surface.tsv")
-    parser.add_argument("-c", "--cyto", help="annotation_cyto file directory including filename, e.g. data/annotation_cyto.tsv")
+    parser.add_argument("-i", "--ids", help="latest_ids file directory, e.g. data/id_mapping.tsv")
+    parser.add_argument("-s", "--surface", help="annotation_surface file directory, e.g. data/annotation_surface.tsv")
+    parser.add_argument("-c", "--cyto", help="annotation_cyto file directory, e.g. data/annotation_cyto.tsv")
     parser.add_argument("-a", "--cache", action="store_true", help="save the data retrieved from UniProt, true if specified")
     parser.add_argument("-p", "--plot", choices=[list(plt.gcf().canvas.get_supported_filetypes().keys())], help="the output format of plots, default is png") #TODO
 
