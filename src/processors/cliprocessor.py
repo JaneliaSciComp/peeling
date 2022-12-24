@@ -24,16 +24,28 @@ class CliProcessor(Processor):
         else:
             # get latest ids by communicating with UniProt
             old_ids = list(mass_data.iloc[:, 0])
-            self.__ids = self._get_uniprot_communicator().get_latest_id(old_ids)
-            if self._get_user_input_reader().get_save():
-                self.__ids.to_csv(self.__path+'/latest_ids.tsv', sep='\t', index=False)
-            self.__ids = self.__ids[['From', 'Entry']]
-        return self.__ids
+            if self.__ids is not None: # for annotation ids
+                old_ids_set = set(old_ids)
+                saved_ids_set = set(self.__ids['From'])
+                logger.debug(f'before retrieve: {len(self.__ids)}')
+                to_retrieve = old_ids_set.difference(saved_ids_set)
+                logger.debug(f'to retrieve: {len(to_retrieve)}')
+                
+                if len(to_retrieve) > 0:
+                    old_ids = list(to_retrieve)
+            retrieved_data = self._get_uniprot_communicator().get_latest_id(old_ids)
+            self.__ids = pd.concat([self.__ids, retrieved_data])
+            logger.debug(f'after concat: {len(self.__ids)}')
+              
+            # if self._get_user_input_reader().get_save():
+            #     self.__ids.to_csv(self.__path+'/latest_ids.tsv', sep='\t', index=False)
+            #self.__ids = self.__ids[['From', 'Entry']]
+        return self.__ids[['From', 'Entry']]
 
 
     # implement abstract method
-    def _get_id_mapping_data_annotation(self):
-        return self.__ids
+    # def _get_id_mapping_data_annotation(self):
+    #     return self.__ids
 
         
     # implement abstract method
@@ -45,8 +57,14 @@ class CliProcessor(Processor):
             if self._get_user_input_reader().get_annotation_surface_filename() is not None: # use local annotation file
                 annotation = self._get_user_input_reader().get_annotation_surface() # the first column should be ids
                 annotation = pd.DataFrame(annotation.iloc[:, 0])
+                if not self._get_user_input_reader().get_id_mapping():
+                    annotation.columns = ['From']
+                    id_mapping_data = self._get_id_mapping_data(annotation)
+                    annotation = self._merge_id(annotation, id_mapping_data)
+                    annotation.reset_index(inplace=True)
+                annotation.columns = ['Entry']
             else: # retrieve annotation file from UniProt
-                annotation = self._get_uniprot_communicator().get_annotation_surface()
+                annotation = self._get_uniprot_communicator().get_annotation('surface')
                 annotation.dropna(subset=['Entry'], axis=0, how='any', inplace=True)
                 if self._get_user_input_reader().get_save():
                     annotation.to_csv(f'{self.__path}/annotation_surface.tsv', sep='\t', index=False)
@@ -55,13 +73,19 @@ class CliProcessor(Processor):
             if self._get_user_input_reader().get_annotation_cyto_filename() is not None: # use local annotation file
                 annotation = self._get_user_input_reader().get_annotation_cyto() # the first column should be ids
                 annotation = pd.DataFrame(annotation.iloc[:, 0])
+                if not self._get_user_input_reader().get_id_mapping():
+                    annotation.columns = ['From']
+                    id_mapping_data = self._get_id_mapping_data(annotation)
+                    annotation = self._merge_id(annotation, id_mapping_data)
+                    annotation.reset_index(inplace=True)
+                annotation.columns = ['Entry']
             else: # retrieve annotation file from UniProt
-                annotation = self._get_uniprot_communicator().get_annotation_cyto()
+                annotation = self._get_uniprot_communicator().get_annotation('cyto')
                 annotation.dropna(subset=['Entry'], axis=0, how='any', inplace=True)
                 if self._get_user_input_reader().get_save():
                     annotation.to_csv(f'{self.__path}/annotation_cyto.tsv', sep='\t', index=False)
                 annotation = annotation[['Entry']]
-        annotation.columns = ['From']
+       
         return annotation
 
 
@@ -97,6 +121,9 @@ class CliProcessor(Processor):
             cyto = self._get_user_input_reader().get_annotation_cyto_filename()
             if cyto is not None:
                 f.write(f'Annotation_cyto file: {cyto}\n')
+            no_id_mapping = self._get_user_input_reader().get_id_mapping()
+            if (surface is not None) or (cyto is not None):
+                f.write(f'No id mapping for local annotations: {no_id_mapping}\n')
    
 
     # implement abstract method
@@ -104,6 +131,8 @@ class CliProcessor(Processor):
         data = self._get_user_input_reader().get_mass_data()
         parent_path = self._construct_path()
         self._analyze(data, parent_path)
+        if self._get_user_input_reader().get_save():
+            self.__ids.to_csv(self.__path+'/latest_ids.tsv', sep='\t', index=False)
         self._write_args(parent_path)
         logger.info(f'Results saved at {parent_path}')
 

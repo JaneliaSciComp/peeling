@@ -23,8 +23,8 @@ class WebProcessor(Processor):
 
 
     # implement abstract method
-    def _get_id_mapping_data_annotation(self):
-        return self._get_uniprot_communicator().get_latest_id().copy()
+    # def _get_id_mapping_data_annotation(self):
+    #     return self._get_uniprot_communicator().get_latest_id().copy()
 
 
     # implement abstract method
@@ -32,8 +32,9 @@ class WebProcessor(Processor):
         '''
         type: 'surface' or 'cyto'
         '''
-        annotation = self._get_uniprot_communicator().get_annotation_surface().copy() if type == 'surface' else self._get_uniprot_communicator().get_annotation_cyto().copy() 
-        annotation.columns = ['From']
+        annotation = self._get_uniprot_communicator().get_annotation(type).copy() 
+        #annotation.columns = ['From']
+        logger.debug(f'\n{annotation.head()}')
         return annotation
     
 
@@ -67,7 +68,7 @@ class WebProcessor(Processor):
         self._write_args(results_path)
         logger.info(f'Results saved at {self.__uuid}')
         shutil.make_archive(f'../results/{self.__uuid}/results', 'zip', root_dir=f'../results/{self.__uuid}/results')
-        #shutil.rmtree(f'../results/{self.__uuid}')
+        #shutil.rmtree(f'../results/{self.__uuid}/results')
         return  self.__uuid
 
 

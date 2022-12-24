@@ -27,6 +27,7 @@ def main():
     parser.add_argument("-c", "--cyto", help="annotation_cyto file directory, e.g. data/annotation_cyto.tsv")
     parser.add_argument("-a", "--cache", action="store_true", help="save the data retrieved from UniProt, true if specified")
     parser.add_argument("-p", "--plot", choices=[list(plt.gcf().canvas.get_supported_filetypes().keys())], help="the output format of plots, default is png") #TODO
+    parser.add_argument("-n", "--nomap", action="store_true", help="no id mapping for local annotation files, true if specified")
 
     args = parser.parse_args()
 
@@ -42,6 +43,7 @@ def main():
     annotation_cyto_filename = args.cyto
     cache = args.cache
     plot_format = args.plot if args.plot is not None else 'png'
+    no_id_mapping = args.nomap
     
     try:
         assert(num_controls>=1 and num_replicates>=1 and tolerance>=0 and tolerance<num_controls*num_replicates), 'Controls, replicates, (conditions) should not be less than 1, and tolerance should not be less than 0.'
@@ -50,7 +52,7 @@ def main():
         return
 
     logger.info(f'{start_time} Analysis starts...')
-    user_input_reader = CliUserInputReader(mass_filename, num_controls, num_replicates, output_directory, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache, plot_format)
+    user_input_reader = CliUserInputReader(mass_filename, num_controls, num_replicates, output_directory, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache, plot_format, no_id_mapping)
     uniprot_communicator = CliUniProtCommunicator(cache)
     processor = CliProcessor(user_input_reader, uniprot_communicator)
     processor.start()

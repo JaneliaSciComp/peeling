@@ -1,0 +1,5 @@
+Mass spec file: ../data/mass_spec_data.tsv
+Number of controls: 2
+Number of replicates: 3
+Tolerance: 0
+Plot format: png

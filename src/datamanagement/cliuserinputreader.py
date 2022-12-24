@@ -7,7 +7,7 @@ logger = logging.getLogger('peeling')
 
 
 class CliUserInputReader(UserInputReader):
-    def __init__(self, mass_filename, num_controls, num_replicates, output_directory, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache, plot_format):
+    def __init__(self, mass_filename, num_controls, num_replicates, output_directory, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache, plot_format, no_id_mapping):
         super().__init__(num_controls, num_replicates, tolerance, plot_format)
         self.__mass_filename = mass_filename
         self.__output_directory = output_directory
@@ -15,6 +15,7 @@ class CliUserInputReader(UserInputReader):
         self.__annotation_surface_filename = annotation_surface_filename
         self.__annotation_cyto_filename = annotation_cyto_filename
         self.__save = cache
+        self.__no_id_mapping = no_id_mapping
 
 
     def __read_file(self, filename):
@@ -25,7 +26,7 @@ class CliUserInputReader(UserInputReader):
             logger.error('Check the input file is tab delimited (.tsv)')
             return
         except FileNotFoundError as e2:
-            print(e2)
+            logger.error(e2)
             return
         
         self._check_file(df)
@@ -81,3 +82,7 @@ class CliUserInputReader(UserInputReader):
 
     def get_save(self):
         return self.__save
+    
+
+    def get_id_mapping(self):
+        return self.__no_id_mapping

@@ -1,9 +1,11 @@
 import re
-import time
+from datetime import datetime
 import zlib
 from urllib.parse import urlparse, parse_qs, urlencode
-import requests
-from requests.adapters import HTTPAdapter, Retry
+# import requests
+# from requests.adapters import HTTPAdapter, Retry
+import httpx
+import asyncio
 import csv
 import pandas as pd
 from abc import ABC, abstractmethod
@@ -11,11 +13,16 @@ import logging
 
 logger = logging.getLogger('peeling')
 
-
-POLLING_INTERVAL = 3
+MAX_KEEPALIVE_CONNECTIONS=10
+MAX_CONNECTIONS=15
+CONNECT_RETRY = 5
+MAX_CHECK_RETRY = 10
+POLLING_INTERVAL = 5
 API_URL = "https://rest.uniprot.org"
 
-# urls for cache have more fields
+CHUNK_SIZE = 2000 #TODO: tune CHUNK_SIZE
+
+# urls for cache have more fields (option for cli user to save retrieved data)
 SURFACE_URL_CACHE = "https://rest.uniprot.org/uniprotkb/search?compressed=true&fields=accession%2Creviewed%2Cid%2Cgene_names%2Corganism_name%2Ccc_subcellular_location&format=tsv&query=%28%28%28cc_scl_term%3ASL-0112%29%20OR%20%28cc_scl_term%3ASL-0243%29%20OR%20%28keyword%3AKW-0732%29%20OR%20%28cc_scl_term%3ASL-9906%29%20OR%20%28cc_scl_term%3ASL-9907%29%29%20AND%20%28reviewed%3Atrue%29%29&size=500"
 CYTO_URL_CACHE = "https://rest.uniprot.org/uniprotkb/search?compressed=true&fields=accession%2Creviewed%2Cid%2Cgene_names%2Corganism_name%2Ccc_subcellular_location&format=tsv&query=%28%28%28%28cc_scl_term%3ASL-0091%29%20OR%20%28cc_scl_term%3ASL-0173%29%20OR%20%28cc_scl_term%3ASL-0191%29%29%20AND%20%28reviewed%3Atrue%29%29%20NOT%20%28%28%28cc_scl_term%3ASL-0112%29%20OR%20%28cc_scl_term%3ASL-0243%29%20OR%20%28keyword%3AKW-0732%29%20OR%20%28cc_scl_term%3ASL-9906%29%20OR%20%28cc_scl_term%3ASL-9907%29%29%20AND%20%28reviewed%3Atrue%29%29%29&size=500"
 SURFACE_URL = "https://rest.uniprot.org/uniprotkb/search?compressed=true&fields=accession&format=tsv&query=%28%28%28cc_scl_term%3ASL-0112%29%20OR%20%28cc_scl_term%3ASL-0243%29%20OR%20%28keyword%3AKW-0732%29%20OR%20%28cc_scl_term%3ASL-9906%29%20OR%20%28cc_scl_term%3ASL-9907%29%29%20AND%20%28reviewed%3Atrue%29%29&size=500"
@@ -24,25 +31,35 @@ CYTO_URL = "https://rest.uniprot.org/uniprotkb/search?compressed=true&fields=acc
 
 class UniProtCommunicator(ABC):
     def __init__(self, cache):
-        retries = Retry(total=5, backoff_factor=0.25, status_forcelist=[500, 502, 503, 504])
-        self.__session = requests.Session()
-        self.__session.mount("https://", HTTPAdapter(max_retries=retries))
         self.__save = cache
+        self.__client = None
+        self.__annotation_surface = None
+        self.__annotation_cyto = None
+    
 
-    def __check_response(self, response):
+    def __create_client(self):
+        limits = httpx.Limits(max_keepalive_connections=MAX_KEEPALIVE_CONNECTIONS, max_connections=MAX_CONNECTIONS)
+        transport = httpx.AsyncHTTPTransport(retries=CONNECT_RETRY)
+        self.__client = httpx.AsyncClient(http2=True, limits=limits, transport=transport, event_hooks={'response': [self.__check_response]})
+
+
+    async def __check_response(self, response):
         try:
+            await response.aread()
+            if response.status_code == 303:
+                return 
             response.raise_for_status()
-        except requests.HTTPError:
-            print(response.json())
+        except httpx.HTTPStatusError:
+            logger.info(response.json())
             raise
 
 
-    def __submit_id_mapping(self, ids):
-        response = requests.post(
+    async def __submit_id_mapping(self, ids):
+        response = await self.__client.post(
             f"{API_URL}/idmapping/run",
             data={"from": 'UniProtKB_AC-ID', "to": 'UniProtKB', "ids": ",".join(ids)},
         )
-        self.__check_response(response) 
+        # print(response.json())
         return response.json()["jobId"]
 
 
@@ -54,26 +71,33 @@ class UniProtCommunicator(ABC):
                 return match.group(1)
 
 
-    def __check_id_mapping_results_ready(self, job_id):
-        while True:
-            response = self.__session.get(f"{API_URL}/idmapping/status/{job_id}")
-            self.__check_response(response)
+    async def __check_id_mapping_results_ready(self, job_id):
+        trial = 0
+        while trial < MAX_CHECK_RETRY:
+            trial += 1
+            # print('here')
+            response = await self.__client.get(f"{API_URL}/idmapping/status/{job_id}")
+            # print(type(response))
+            if response.status_code == 303: 
+                return response.headers.get('location')
+                # print(response.headers.get('location'))
+                # response = await self.__client.get(response.headers.get('location'))
             j = response.json() 
             if "jobStatus" in j:
                 if j["jobStatus"] == "RUNNING":
-                    print(f"Retrying in {POLLING_INTERVAL}s")
-                    time.sleep(POLLING_INTERVAL)
+                    logger.info(f"{job_id}: Retrying in {POLLING_INTERVAL}s")
+                    await asyncio.sleep(POLLING_INTERVAL)
                 else:
                     raise Exception(j["jobStatus"])
             else:
                 return bool(j["results"] or j["failedIds"]) #bool()return false if aug is 0,empty,None,false, otherwise true
+        raise Exception('Reach max trials for check job status')
 
 
-    def __get_batch(self, batch_response, compressed):
+    async def __get_batch(self, batch_response, compressed):
         batch_url = self.__get_next_link(batch_response.headers) # this step is repeated until there is no batch_url
         while batch_url:
-            batch_response = self.__session.get(batch_url)
-            self.__check_response(batch_response) #batch_response.raise_for_status()
+            batch_response = await self.__client.get(batch_url)
             yield self.__decode_results(batch_response, compressed) #yield is similar to return, but next time the func is called, it will start from here, usually this func will be called in a loop
             batch_url = self.__get_next_link(batch_response.headers) # repeats
 
@@ -82,11 +106,10 @@ class UniProtCommunicator(ABC):
         return all_results + batch_results[1:]
 
 
-    def __get_id_mapping_results_link(self, job_id):
-        url = f"{API_URL}/idmapping/details/{job_id}"
-        response = self.__session.get(url)
-        self.__check_response(response) 
-        return response.json()["redirectURL"]
+    # async def __get_id_mapping_results_link(self, job_id):
+    #     url = f"{API_URL}/idmapping/details/{job_id}"
+    #     response = await self.__client.get(url)
+    #     return response.json()["redirectURL"]
 
 
     def __decode_results(self, response, compressed):
@@ -97,8 +120,7 @@ class UniProtCommunicator(ABC):
             return [line for line in response.text.split("\n") if line]
 
 
-
-    def __get_id_mapping_results_search(self, url):
+    async def __get_id_mapping_results_search(self, url):
         parsed = urlparse(url) 
         query = parse_qs(parsed.query)
         file_format = "tsv" 
@@ -111,20 +133,17 @@ class UniProtCommunicator(ABC):
             query['fields'] = 'accession'
         parsed = parsed._replace(query=urlencode(query, doseq=True))
         url = parsed.geturl()
-        #print(url)
-        response = self.__session.get(url)
-        self.__check_response(response)
+        response = await self.__client.get(url)
         results = self.__decode_results(response, compressed)
-        for i, batch in enumerate(self.__get_batch(response, compressed), 1):
+        async for batch in self.__get_batch(response, compressed):
             results = self.__combine_batches(results, batch)
         return results
     
 
-    def __get_annotation_results_search(self, url):
-        response = self.__session.get(url)
-        self.__check_response(response)
+    async def __get_annotation_results_search(self, url):
+        response = await self.__client.get(url)
         results = self.__decode_results(response, True)
-        for i, batch in enumerate(self.__get_batch(response, True), 1):
+        async for batch in self.__get_batch(response, True):
             results = self.__combine_batches(results, batch)
         return results
 
@@ -135,21 +154,62 @@ class UniProtCommunicator(ABC):
 
 
     def _retrieve_latest_id(self, old_ids):
+        results = asyncio.run(self._retrieve_latest_id_async(old_ids))
+        return results
+    
+
+    async def _retrieve_latest_id_async(self, old_ids):
+        start_time = datetime.now()
+
+        if self.__client is None:
+            self.__create_client()
+
+        # divide old_ids into chunks
+        num_chunks = len(old_ids) // CHUNK_SIZE
+        residual = len(old_ids) % CHUNK_SIZE
+        num_chunks += 1 if residual>0 else 0
+        chunks = [old_ids[CHUNK_SIZE*i:CHUNK_SIZE*(i+1)] if i<(num_chunks-1) else old_ids[CHUNK_SIZE*i:] for i in range(num_chunks)]
+        logger.info(f'Ids are divided into {num_chunks} chunks with size {CHUNK_SIZE}')
+        logger.info('Communicating with UniProt for id mapping...')
+
+        results_list = await asyncio.gather(*map(self.__retrieve_latest_id_chunk, chunks)) 
+        await self.__client.aclose()
+        self.__client = None
+
+        failed_ids = 0
+        retrieved_ids = 0
+        results_list_filtered = []
+        for item in results_list: #item may be list df or integer (len(chunk)) if mapping failed
+            if isinstance(item, int):
+                failed_ids += item
+            else:
+                retrieved_ids += len(item)
+                results_list_filtered.append(item)
+
+        logger.info(f'Retrieved {retrieved_ids} ids, {max(len(old_ids) - retrieved_ids, 0)} ids didn\'t find id mapping data, {failed_ids} ids failed for id mapping')
+        logger.info(f'{datetime.now()-start_time} for id mapping')
+        
+        return pd.concat(results_list_filtered)
+
+
+    async def __retrieve_latest_id_chunk(self, chunk):
         try:
-            logger.info('Communicating with UniProt for id mapping...')
-            job_id = self.__submit_id_mapping(old_ids)
-            if self.__check_id_mapping_results_ready(job_id):
-                link = self.__get_id_mapping_results_link(job_id)
-            results = self.__get_id_mapping_results_search(link)
+            job_id = await self.__submit_id_mapping(chunk)
+            # if await self.__check_id_mapping_results_ready(job_id):
+            #     link = await self.__get_id_mapping_results_link(job_id)
+                # print(f'slow link: {link}')
+            link = await self.__check_id_mapping_results_ready(job_id)
+            results = await self.__get_id_mapping_results_search(link)
             results_df = self.__get_data_frame_from_tsv_results(results)
-            logger.debug(f'retrieved: {len(results_df)}')
+            logger.info(f'retrieved: {len(results_df)}')
             if not self.__save and len(results_df)>0:
                 results_df = results_df[['From', 'Entry']]
             return results_df
         except Exception as e:
             logger.error(e)
-            logger.error('Retry _retrieve_latest_id()')
-            self._retrieve_latest_id()
+            # logger.error('Retry _retrieve_latest_id()')
+            # self._retrieve_latest_id()
+            return len(chunk)
 
 
     @abstractmethod
@@ -157,37 +217,68 @@ class UniProtCommunicator(ABC):
         raise NotImplemented()
 
     
-    def _retrieve_annotation_surface(self):
+    async def __retrieve_annotation_surface(self):
         try:
             logger.info('Retrieving annotation_surface file from UniProt...') #To do
             url = SURFACE_URL_CACHE if self.__save else SURFACE_URL
-            results = self.__get_annotation_results_search(url)
+            results = await self.__get_annotation_results_search(url)
             results = self.__get_data_frame_from_tsv_results(results)
-            return results
+            logger.info(f'Retrieved {len(results)} entries for annotation_surface')
+            self.__annotation_surface = results
         except Exception as e:
             logger.error(e)
-            logger.error('Retry _retrieve_annotation_surface()')
-            self._retrieve_annotation_surface()   
+            logger.info(f'Retrieved annotation_surface failed')
+            # logger.error('Retry _retrieve_annotation_surface()')
+            # self._retrieve_annotation_surface()
+            raise   
 
 
-    def _retrieve_annotation_cyto(self):
+    async def __retrieve_annotation_cyto(self):
         try:
             logger.info('Retrieving annotation_cyto file from UniProt...') #To do
             url = CYTO_URL_CACHE if self.__save else CYTO_URL
-            results = self.__get_annotation_results_search(url)
+            results = await self.__get_annotation_results_search(url)
             results = self.__get_data_frame_from_tsv_results(results)
-            return results
+            logger.info(f'Retrieved {len(results)} entries for annotation_cyto')
+            self.__annotation_cyto = results
         except Exception as e:
             logger.error(e)
-            logger.error('Retry _retrieve_annotation_cyto()')
-            self._retrieve_annotation_cyto()
+            logger.info(f'Retrieved annotation_cyto failed')
+            # logger.error('Retry _retrieve_annotation_cyto()')
+            # self._retrieve_annotation_cyto()
+            raise
+    
+
+    async def _retrieve_annotation_async(self):
+        start_time = datetime.now()
+
+        if self.__client is None:
+            self.__create_client()
+        
+        await asyncio.gather(self.__retrieve_annotation_surface(), self.__retrieve_annotation_cyto()) 
+        await self.__client.aclose()
+        self.__client = None
+
+        logger.info(f'{datetime.now()-start_time} for retrieving annotations')
+    
+
+    def _retrieve_annotation(self):
+        asyncio.run(self._retrieve_annotation_async())
+        #await self.__retrieve_annotation()
+        logger.debug(f'{self.__annotation_surface.head()}\n')
+        # self.__annotation_surface = pd.read_table('../retrieved_data/annotation_surface.tsv', sep='\t')
+        # self.__annotation_cyto = pd.read_table('../retrieved_data/annotation_cyto.tsv', sep='\t')
 
 
-    @abstractmethod
-    def get_annotation_surface(self):
-        raise NotImplemented()
+    def get_annotation(self, type):
+        if self.__annotation_surface is None or self.__annotation_cyto is None:
+                self._retrieve_annotation()
+        if type=='surface':
+            return self.__annotation_surface
+        elif type=='cyto':
+            return self.__annotation_cyto
+    
 
-
-    @abstractmethod
-    def get_annotation_cyto(self):
-        raise NotImplemented()
+    def _shorten_annotation(self):
+        self.__annotation_surface = self.__annotation_surface[['Entry']]
+        self.__annotation_cyto = self.__annotation_cyto[['Entry']]

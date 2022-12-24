@@ -21,25 +21,25 @@ class Processor(ABC):
         raise NotImplemented()
 
     
-    @abstractmethod
-    def _get_id_mapping_data_annotation(self):
-        raise NotImplemented()
+    # @abstractmethod
+    # def _get_id_mapping_data_annotation(self):
+    #     raise NotImplemented()
 
 
-    def __merge_id(self, mass_data, id_mapping_data):
+    def _merge_id(self, mass_data, id_mapping_data):
         logger.debug(f'\n{id_mapping_data.head()}')
         id_mapping_data.drop_duplicates(subset=['From'], keep='first', inplace=True)
         id_mapping_data.set_index('From', inplace=True)
 
         mass_data = mass_data.merge(id_mapping_data, how='left', left_on = mass_data.columns[0], right_index=True)
         id_mapping_data.reset_index(inplace=True)
-        # if for_annotation:
-#             data = data[data['Entry'].isin(other_data.index)]
-        logger.debug(f'len(mass_data): {len(mass_data)}')
+        logger.debug(f'len(data): {len(mass_data)}')
         logger.debug(f'\n{mass_data.head()}')
         logger.debug(f"No Id mapping data: {np.sum(np.sum(mass_data[['From', 'Entry']].isnull()))}")
         mass_data[['From', 'Entry']]=mass_data[['From', 'Entry']].fillna(axis=1, method='ffill')
         logger.debug(f"After fillna: {np.sum(np.sum(mass_data[['From', 'Entry']].isnull()))}")
+        updated_ids=np.sum(mass_data['From']!=mass_data['Entry'])
+        logger.debug(f'Updated ids: {updated_ids}')
         mass_data.drop([mass_data.columns[0]], axis=1, inplace=True)
         mass_data.set_index('Entry', inplace=True)
         logger.info('Id mapping is done') #To do
@@ -51,13 +51,13 @@ class Processor(ABC):
         raise NotImplemented()
 
 
-    def __merge_annotation(self, mass_data, annotation, id_mapping_data, type):
+    def __merge_annotation(self, mass_data, annotation, type):
         '''
         type: 'surface' or 'cyto'
         '''
         annotation['Add'] = 1
-        annotation = self.__merge_id(annotation, id_mapping_data)
-        annotation.reset_index(inplace=True)
+        #annotation = self._merge_id(annotation, id_mapping_data)
+        #annotation.reset_index(inplace=True)
         annotation.drop_duplicates(keep='first', inplace=True)
         annotation.dropna(axis=0, how='any', inplace=True)
         annotation.set_index('Entry', inplace=True)
@@ -97,8 +97,9 @@ class Processor(ABC):
         '''
         col_list = data.columns[-3:]
         plt.figure()
-        data[col_list].plot(use_index=False, xticks = []) 
+        data[col_list].plot(use_index=False, ) #xticks = []
         
+        plt.xlabel('Rank')
         plt.title('TPR, FPR, TPR-FPR_'+col_list[0][4:])
         fig_name = f'TPR_FPR_{col_list[0][4:]}'
         plt.savefig(f'{output_dir}/{fig_name}.{self.__user_input_reader.get_plot_format()}')
@@ -183,12 +184,12 @@ class Processor(ABC):
         data.rename(columns={id_col: 'From'}, inplace=True)
         
         id_mapping_data = self._get_id_mapping_data(data)
-        data = self.__merge_id(data, id_mapping_data)
-        id_mapping_data = self._get_id_mapping_data_annotation()
+        data = self._merge_id(data, id_mapping_data)
+        #id_mapping_data = self._get_id_mapping_data_annotation()
         annotation_surface = self._get_annotation_data('surface')
-        data = self.__merge_annotation(data, annotation_surface, id_mapping_data, 'surface')
+        data = self.__merge_annotation(data, annotation_surface, 'surface')
         annotation_cyto = self._get_annotation_data('cyto')
-        data = self.__merge_annotation(data, annotation_cyto, id_mapping_data, 'cyto')
+        data = self.__merge_annotation(data, annotation_cyto, 'cyto')
         
         plots_path = os.path.join(parent_path, "plots") 
         try: 
