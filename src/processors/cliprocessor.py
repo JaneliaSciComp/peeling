@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 import pandas as pd
 import logging
+import asyncio
 
 logger = logging.getLogger('peeling')
 
@@ -15,7 +16,7 @@ class CliProcessor(Processor):
 
 
     # implement abstract method
-    def _get_id_mapping_data(self, mass_data):
+    async def _get_id_mapping_data(self, mass_data):
         if self._get_user_input_reader().get_latest_ids_filename() is not None:
             # read in local ids file
             self.__ids = self._get_user_input_reader().get_latest_ids()
@@ -33,7 +34,7 @@ class CliProcessor(Processor):
                 
                 if len(to_retrieve) > 0:
                     old_ids = list(to_retrieve)
-            retrieved_data = self._get_uniprot_communicator().get_latest_id(old_ids)
+            retrieved_data = await self._get_uniprot_communicator().get_latest_id(old_ids)
             self.__ids = pd.concat([self.__ids, retrieved_data])
             logger.debug(f'after concat: {len(self.__ids)}')
               
@@ -42,14 +43,9 @@ class CliProcessor(Processor):
             #self.__ids = self.__ids[['From', 'Entry']]
         return self.__ids[['From', 'Entry']]
 
-
-    # implement abstract method
-    # def _get_id_mapping_data_annotation(self):
-    #     return self.__ids
-
         
     # implement abstract method
-    def _get_annotation_data(self, type):
+    async def _get_annotation_data(self, type):
         '''
         type: 'surface' or 'cyto'
         '''
@@ -59,12 +55,12 @@ class CliProcessor(Processor):
                 annotation = pd.DataFrame(annotation.iloc[:, 0])
                 if not self._get_user_input_reader().get_id_mapping():
                     annotation.columns = ['From']
-                    id_mapping_data = self._get_id_mapping_data(annotation)
+                    id_mapping_data = await self._get_id_mapping_data(annotation)
                     annotation = self._merge_id(annotation, id_mapping_data)
                     annotation.reset_index(inplace=True)
                 annotation.columns = ['Entry']
             else: # retrieve annotation file from UniProt
-                annotation = self._get_uniprot_communicator().get_annotation('surface')
+                annotation = await self._get_uniprot_communicator().get_annotation('surface')
                 annotation.dropna(subset=['Entry'], axis=0, how='any', inplace=True)
                 if self._get_user_input_reader().get_save():
                     annotation.to_csv(f'{self.__path}/annotation_surface.tsv', sep='\t', index=False)
@@ -75,12 +71,12 @@ class CliProcessor(Processor):
                 annotation = pd.DataFrame(annotation.iloc[:, 0])
                 if not self._get_user_input_reader().get_id_mapping():
                     annotation.columns = ['From']
-                    id_mapping_data = self._get_id_mapping_data(annotation)
+                    id_mapping_data = await self._get_id_mapping_data(annotation)
                     annotation = self._merge_id(annotation, id_mapping_data)
                     annotation.reset_index(inplace=True)
                 annotation.columns = ['Entry']
             else: # retrieve annotation file from UniProt
-                annotation = self._get_uniprot_communicator().get_annotation('cyto')
+                annotation = await self._get_uniprot_communicator().get_annotation('cyto')
                 annotation.dropna(subset=['Entry'], axis=0, how='any', inplace=True)
                 if self._get_user_input_reader().get_save():
                     annotation.to_csv(f'{self.__path}/annotation_cyto.tsv', sep='\t', index=False)
@@ -130,7 +126,7 @@ class CliProcessor(Processor):
     def start(self):
         data = self._get_user_input_reader().get_mass_data()
         parent_path = self._construct_path()
-        self._analyze(data, parent_path)
+        asyncio.run(self._analyze(data, parent_path))
         if self._get_user_input_reader().get_save():
             self.__ids.to_csv(self.__path+'/latest_ids.tsv', sep='\t', index=False)
         self._write_args(parent_path)

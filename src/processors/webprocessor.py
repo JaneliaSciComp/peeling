@@ -16,23 +16,18 @@ class WebProcessor(Processor):
 
 
     # implement abstract method
-    def _get_id_mapping_data(self, mass_data):
+    async def _get_id_mapping_data(self, mass_data):
         old_ids = list(mass_data.iloc[:, 0])
-        new_ids_df = self._get_uniprot_communicator().get_latest_id(old_ids).copy() 
+        new_ids_df = await self._get_uniprot_communicator().get_latest_id(old_ids).copy() 
         return new_ids_df
 
 
     # implement abstract method
-    # def _get_id_mapping_data_annotation(self):
-    #     return self._get_uniprot_communicator().get_latest_id().copy()
-
-
-    # implement abstract method
-    def _get_annotation_data(self, type):
+    async def _get_annotation_data(self, type):
         '''
         type: 'surface' or 'cyto'
         '''
-        annotation = self._get_uniprot_communicator().get_annotation(type).copy() 
+        annotation = await self._get_uniprot_communicator().get_annotation(type).copy() 
         #annotation.columns = ['From']
         logger.debug(f'\n{annotation.head()}')
         return annotation
@@ -64,7 +59,7 @@ class WebProcessor(Processor):
     async def start(self):
         data = await self._get_user_input_reader().get_mass_data()
         results_path = self._construct_path()
-        self._analyze(data, results_path)
+        await self._analyze(data, results_path)
         self._write_args(results_path)
         logger.info(f'Results saved at {self.__uuid}')
         shutil.make_archive(f'../results/{self.__uuid}/results', 'zip', root_dir=f'../results/{self.__uuid}/results')

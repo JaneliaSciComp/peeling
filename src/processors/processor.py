@@ -178,17 +178,17 @@ class Processor(ABC):
         raise NotImplemented()
 
 
-    def _analyze(self, data, parent_path):
+    async def _analyze(self, data, parent_path):
        # num_conditions = self.__user_input_reader.get_num_conditions()
         id_col = data.columns[0]
         data.rename(columns={id_col: 'From'}, inplace=True)
         
-        id_mapping_data = self._get_id_mapping_data(data)
+        id_mapping_data = await self._get_id_mapping_data(data)
         data = self._merge_id(data, id_mapping_data)
         #id_mapping_data = self._get_id_mapping_data_annotation()
-        annotation_surface = self._get_annotation_data('surface')
+        annotation_surface = await self._get_annotation_data('surface')
         data = self.__merge_annotation(data, annotation_surface, 'surface')
-        annotation_cyto = self._get_annotation_data('cyto')
+        annotation_cyto = await self._get_annotation_data('cyto')
         data = self.__merge_annotation(data, annotation_cyto, 'cyto')
         
         plots_path = os.path.join(parent_path, "plots") 

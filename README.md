@@ -28,13 +28,13 @@ The order of the three required arguments should NOT be changed.
 #### Note
 The basic usage will communicate with the UniProt website to map the IDs to the latest version, and get the annotation data of surface proteins (TP) and introcellular proteins (FP). As of our testing, it will take dozens of seconds to minutes for the process. 
 
-Therefore, it is recommended to save the retrieved data when first time run it, and use the locally saved data for the following runs, which will reduce the run time to seconds. Remember to update the retrieved data periodically.
+Therefore, it is recommended to save the retrieved data when first time run it, and use the locally saved data for the following runs, which will reduce the run time to seconds. You can also provide your own annotation files. If the local annotation files are from Uniprot (saved by using -c/--cache), there is no need to do id mapping for them. To disable id mapping for local annotation files specify -n/--nomap. Remember to update the retrieved data periodically.
 ```
 # To save the retrieved data, specify -a/--cache
 python3 main.py mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates --cache
 
 # To use locally saved data, specify the directories
-python3 main.py mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates --ids latest_ids_dir --surface annotation_surface_dir --cyto annotation_cyto_dir
+python3 main.py mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates --ids latest_ids_dir --surface annotation_surface_dir --cyto annotation_cyto_dir --nomap
 ```
 
 ### Options
@@ -54,3 +54,4 @@ python3 main.py mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replic
 
 -p, --plot    The format of the output plots, default is png. Supported formats depend on the computation platform, use -h/--help to see supported formats
 
+-n, --nomap    No id mapping for local annotation files, true if specified

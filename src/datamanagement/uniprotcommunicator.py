@@ -151,14 +151,9 @@ class UniProtCommunicator(ABC):
     def __get_data_frame_from_tsv_results(self, tsv_results):
         reader = csv.DictReader(tsv_results, delimiter="\t", quotechar='"')
         return pd.DataFrame(list(reader))
-
-
-    def _retrieve_latest_id(self, old_ids):
-        results = asyncio.run(self._retrieve_latest_id_async(old_ids))
-        return results
     
 
-    async def _retrieve_latest_id_async(self, old_ids):
+    async def _retrieve_latest_id(self, old_ids):
         start_time = datetime.now()
 
         if self.__client is None:
@@ -249,7 +244,7 @@ class UniProtCommunicator(ABC):
             raise
     
 
-    async def _retrieve_annotation_async(self):
+    async def _retrieve_annotation(self):
         start_time = datetime.now()
 
         if self.__client is None:
@@ -260,19 +255,15 @@ class UniProtCommunicator(ABC):
         self.__client = None
 
         logger.info(f'{datetime.now()-start_time} for retrieving annotations')
-    
+      
 
-    def _retrieve_annotation(self):
-        asyncio.run(self._retrieve_annotation_async())
-        #await self.__retrieve_annotation()
-        logger.debug(f'{self.__annotation_surface.head()}\n')
+    async def get_annotation(self, type):
+        # for dev stage
         # self.__annotation_surface = pd.read_table('../retrieved_data/annotation_surface.tsv', sep='\t')
         # self.__annotation_cyto = pd.read_table('../retrieved_data/annotation_cyto.tsv', sep='\t')
 
-
-    def get_annotation(self, type):
         if self.__annotation_surface is None or self.__annotation_cyto is None:
-                self._retrieve_annotation()
+                await self._retrieve_annotation()
         if type=='surface':
             return self.__annotation_surface
         elif type=='cyto':
