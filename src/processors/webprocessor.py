@@ -13,7 +13,7 @@ class WebProcessor(Processor):
         super().__init__(user_input_reader, uniprot_communicator)
         self.__uuid = None
         self.__web_plots_path = None
-        self.__failed_id_mapping = None
+        self.__failed_id_mapping = 0
 
 
     # implement abstract method
@@ -21,7 +21,8 @@ class WebProcessor(Processor):
         old_ids = list(mass_data.iloc[:, 0])
         meta={}
         new_ids_df = await self._get_uniprot_communicator().get_latest_id(old_ids, meta)
-        self.__failed_id_mapping = meta['failed_id_mapping']
+        if 'failed_id_mapping' in meta.keys(): # false if no id needs mapping
+            self.__failed_id_mapping = meta['failed_id_mapping']
         return new_ids_df.copy()
 
 
@@ -50,7 +51,6 @@ class WebProcessor(Processor):
         results_path = os.path.join(parent_path, 'results')
         web_plots_path = os.path.join(parent_path, "web_plots")
         self.__web_plots_path = web_plots_path
-        print(results_path, web_plots_path)
         try: 
             os.makedirs(web_plots_path, exist_ok=True) 
         except OSError as error: 

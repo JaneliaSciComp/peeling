@@ -172,17 +172,22 @@ class UniProtCommunicator(ABC):
         self.__client = None
 
         failed_ids = 0
+        no_mapping_ids_set = set()
         retrieved_ids = 0
         results_list_filtered = []
-        for item in results_list: #item may be list df or integer (len(chunk)) if mapping failed
+        for i, item in enumerate(results_list): #item may be list df or integer (len(chunk)) if mapping failed
             if isinstance(item, int):
                 failed_ids += item
             else:
                 retrieved_ids += len(item)
                 results_list_filtered.append(item)
+                if len(chunks[i]) > len(item): # there are ids that didn't find mapping data
+                    no_mapping_ids_set = no_mapping_ids_set.union(set(chunks[i]).difference(set(item.iloc[:, 0])))
+                    logger.debug(no_mapping_ids_set)
 
         meta['failed_id_mapping'] = failed_ids
-        logger.info(f'Retrieved {retrieved_ids} ids, {max(len(old_ids) - retrieved_ids, 0)} ids didn\'t find id mapping data, {failed_ids} ids failed for id mapping')
+        meta['no_id_mapping'] = no_mapping_ids_set
+        logger.info(f'Retrieved {retrieved_ids} ids, {len(no_mapping_ids_set)} ids didn\'t find id mapping data, {failed_ids} ids failed for id mapping')
         logger.info(f'{datetime.now()-start_time} for id mapping')
         
         return pd.concat(results_list_filtered)
