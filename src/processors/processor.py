@@ -34,7 +34,7 @@ class Processor(ABC):
         mass_data[['From', 'Entry']]=mass_data[['From', 'Entry']].fillna(axis=1, method='ffill')
         logger.debug(f"After fillna: {np.sum(np.sum(mass_data[['From', 'Entry']].isnull()))}")
         updated_ids=np.sum(mass_data['From']!=mass_data['Entry'])
-        logger.debug(f'Mapped ids: {updated_ids}')
+        logger.info(f'Mapped ids: {updated_ids}')
         mass_data.drop([mass_data.columns[0]], axis=1, inplace=True)
         mass_data.set_index('Entry', inplace=True)
         logger.info('Id mapping is done') #To do

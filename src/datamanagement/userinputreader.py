@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import logging
+import matplotlib.pyplot as plt
 
 logger = logging.getLogger('peeling')
 
@@ -10,6 +11,18 @@ class UserInputReader(ABC):
         self.__num_replicates = num_replicates
         self.__tolerance = tolerance
         self.__plot_format = plot_format
+        self.__check_init()
+    
+
+    def __check_init(self):
+        try:
+            assert(self.__num_controls >= 1), '# Controls should be a positive integer'
+            assert(self.__num_replicates >= 1), '# Replicates should be a positive integer'
+            assert(self.__tolerance >= 0 and self.__tolerance <= self.__num_controls*self.__num_replicates), 'Tolerance should be an integer in [0, #controls * #replicates)'
+            assert(self.__plot_format in set(plt.gcf().canvas.get_supported_filetypes().keys())), 'The plot format is invalid'
+        except AssertionError as e:
+            logger.error('Stopped!', e)
+            raise
     
     
     def _check_file(self, df):
@@ -17,7 +30,7 @@ class UserInputReader(ABC):
             assert(len(df) >= 1), 'The file is empty'
         except AssertionError as e:
             logger.error('Stopped!', e)
-            return
+            raise
     
 
     def _check_mass_spec_file(self, df):
@@ -26,7 +39,7 @@ class UserInputReader(ABC):
         except AssertionError as e:
             logger.error('Stopped!', e)
             logger.error('Check the input file is tab delimited (.tsv) and has correct data')
-            return
+            raise
     
 
     @abstractmethod

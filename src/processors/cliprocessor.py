@@ -107,7 +107,7 @@ class CliProcessor(Processor):
 
     def _write_args(self, path):
         super()._write_args(path)
-        with open(os.path.join(path, 'user_input.txt'), 'a') as f:
+        with open(os.path.join(path, 'log.txt'), 'a') as f:
             ids = self._get_user_input_reader().get_latest_ids_filename()
             if ids is not None:
                 f.write(f'Latest_ids file: {ids}\n')

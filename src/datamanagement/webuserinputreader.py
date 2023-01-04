@@ -11,10 +11,6 @@ class WebUserInputReader(UserInputReader):
     def __init__(self, mass_file:UploadFile, num_controls, num_replicates, tolerance, plot_format): #, ids_file, annotation_surface_file, annotation_cyto_file
         super().__init__(num_controls, num_replicates, tolerance, plot_format)
         self.__mass_file = mass_file
-    
-
-    #TODO
-    #def __check_input(self, n): #check plot format
 
 
     async def __decode_uploadFile(self):

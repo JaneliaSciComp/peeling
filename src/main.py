@@ -44,12 +44,6 @@ def main():
     cache = args.cache
     plot_format = args.plot if args.plot is not None else 'png'
     no_id_mapping = args.nomap
-    
-    try:
-        assert(num_controls>=1 and num_replicates>=1 and tolerance>=0 and tolerance<num_controls*num_replicates), 'Controls, replicates, (conditions) should not be less than 1, and tolerance should not be less than 0.'
-    except AssertionError as e:
-        logger.error('Stopped!', e)
-        return
 
     logger.info(f'{start_time} Analysis starts...')
     user_input_reader = CliUserInputReader(mass_filename, num_controls, num_replicates, output_directory, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache, plot_format, no_id_mapping)

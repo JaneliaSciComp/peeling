@@ -164,7 +164,7 @@ class UniProtCommunicator(ABC):
         residual = len(old_ids) % CHUNK_SIZE
         num_chunks += 1 if residual>0 else 0
         chunks = [old_ids[CHUNK_SIZE*i:CHUNK_SIZE*(i+1)] if i<(num_chunks-1) else old_ids[CHUNK_SIZE*i:] for i in range(num_chunks)]
-        logger.info(f'Ids are divided into {num_chunks} chunks with size {CHUNK_SIZE}')
+        logger.info(f'{len(old_ids)} ids are divided into {num_chunks} chunks with size {CHUNK_SIZE}')
         logger.info('Communicating with UniProt for id mapping...')
 
         results_list = await asyncio.gather(*map(self.__retrieve_latest_id_chunk, chunks)) 
@@ -252,7 +252,7 @@ class UniProtCommunicator(ABC):
 
     async def _retrieve_annotation(self):
         # for dev stage
-        # self.__annotation_surface = pd.read_table('../retrieved_data/annotation_surface.tsv', sep='\t')
+       #  self.__annotation_surface = pd.read_table('../retrieved_data/annotation_surface.tsv', sep='\t')
 #         self.__annotation_cyto = pd.read_table('../retrieved_data/annotation_cyto.tsv', sep='\t')
 #         logger.debug(f'\n{self.__annotation_surface.head()}')
 #         return

@@ -24,10 +24,10 @@ class CliUserInputReader(UserInputReader):
         except UnicodeDecodeError as e1:
             logger.error('Stopped!', e1) 
             logger.error('Check the input file is tab delimited (.tsv)')
-            return
+            raise
         except FileNotFoundError as e2:
             logger.error(e2)
-            return
+            raise
         
         self._check_file(df)
         return df
@@ -60,20 +60,35 @@ class CliUserInputReader(UserInputReader):
 
     def get_latest_ids(self):
         df = self.__read_file(self.__ids_filename)
-        logger.info('Read in %d rows from latest_ids file' % (len(df)))
-        return df
-       
+        try:
+            assert(df.shape[1] >= 2), 'Latest ids file should have at least two columns'
+            logger.info('Read in %d rows from latest_ids file' % (len(df)))
+            return df
+        except AssertionError as e:
+            logger.error('Stopped!', e)
+            raise
+        
 
     def get_annotation_surface(self):
         df = self.__read_file(self.__annotation_surface_filename)
-        logger.info('Read in %d rows from annotation_surface file' % (len(df)))
-        return df
+        try:
+            assert(df.shape[1] >= 1), 'Annotation_surface file should have at least one column containing ids of extracellular proteins'    
+            logger.info('Read in %d rows from annotation_surface file' % (len(df)))
+            return df
+        except AssertionError as e:
+            logger.error('Stopped!', e)
+            raise
        
 
     def get_annotation_cyto(self):
         df = self.__read_file(self.__annotation_cyto_filename)
-        logger.info('Read in %d rows from annotation_cyto file' % (len(df)))
-        return df
+        try:
+            assert(df.shape[1] >= 1), 'Annotation_cyto file should have at least one column containing ids of intracellular proteins'    
+            logger.info('Read in %d rows from annotation_cyto file' % (len(df)))
+            return df
+        except AssertionError as e:
+            logger.error('Stopped!', e)
+            raise
 
     
     def get_output_directory(self):
