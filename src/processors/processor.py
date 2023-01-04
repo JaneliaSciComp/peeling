@@ -20,11 +20,6 @@ class Processor(ABC):
     def _get_id_mapping_data(self, data):
         raise NotImplemented()
 
-    
-    # @abstractmethod
-    # def _get_id_mapping_data_annotation(self):
-    #     raise NotImplemented()
-
 
     def _merge_id(self, mass_data, id_mapping_data):
         logger.debug(f'\n{id_mapping_data.head()}')

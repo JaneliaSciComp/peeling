@@ -14,18 +14,18 @@ class WebUniProtCommunicator(UniProtCommunicator):
 
 
     # overriding super class method
-    async def _retrieve_latest_id(self, old_ids):
-        results_df = await super()._retrieve_latest_id(old_ids)
+    async def _retrieve_latest_id(self, old_ids, meta):
+        results_df = await super()._retrieve_latest_id(old_ids, meta)
         if len(results_df)>0:
                 results_df = results_df[['From', 'Entry']]
         return results_df
 
 
     # overriding abstract method
-    async def get_latest_id(self, old_ids=None):
+    async def get_latest_id(self, old_ids, meta):
         if old_ids is not None: #for merge ids
             if self.__ids is None:
-                self.__ids = await self._retrieve_latest_id(old_ids)
+                self.__ids = await self._retrieve_latest_id(old_ids, meta)
                 return self.__ids
             else:
                 old_ids_set = set(old_ids)
@@ -35,7 +35,7 @@ class WebUniProtCommunicator(UniProtCommunicator):
                 logger.info(f'to retrieve: {len(to_retrieve)}')
                 
                 if len(to_retrieve) > 0:
-                    retrieved_data = await self._retrieve_latest_id(list(to_retrieve))
+                    retrieved_data = await self._retrieve_latest_id(list(to_retrieve), meta)
                     self.__ids = pd.concat([self.__ids, retrieved_data])
                 logger.debug(f'after retrieve: {len(self.__ids)}')
             return self.__ids[self.__ids['From'].isin(old_ids)]
@@ -52,8 +52,9 @@ class WebUniProtCommunicator(UniProtCommunicator):
     async def update_data(self):
         start_time = datetime.now()
         logger.info('Updating data...')
+        meta={}
         if self.__ids is not None:
-            updated_ids = await self._retrieve_latest_id(list(self.__ids['From']))
+            updated_ids = await self._retrieve_latest_id(list(self.__ids['From']), meta)
             num_diff = len(set(updated_ids['Entry']).difference(set(self.__ids['Entry'])))
             logger.info(f'{num_diff} ids are updated')
             self.__ids = updated_ids
