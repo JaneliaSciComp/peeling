@@ -201,7 +201,7 @@ class Processor(ABC):
     
 
     def _write_args(self, path):
-        with open(os.path.join(path, 'user_input.txt'), 'w') as f:
+        with open(os.path.join(path, 'log.txt'), 'w') as f:
             f.write('Mass spec file: ' + str(self.__user_input_reader.get_mass_spec_filename()) + '\n')
             f.write(f'Number of controls: {self.__user_input_reader.get_num_controls()}\n')
             f.write(f'Number of replicates: {self.__user_input_reader.get_num_replicates()}\n')

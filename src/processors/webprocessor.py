@@ -18,8 +18,8 @@ class WebProcessor(Processor):
     # implement abstract method
     async def _get_id_mapping_data(self, mass_data):
         old_ids = list(mass_data.iloc[:, 0])
-        new_ids_df = await self._get_uniprot_communicator().get_latest_id(old_ids).copy() 
-        return new_ids_df
+        new_ids_df = await self._get_uniprot_communicator().get_latest_id(old_ids)
+        return new_ids_df.copy()
 
 
     # implement abstract method
@@ -27,10 +27,10 @@ class WebProcessor(Processor):
         '''
         type: 'surface' or 'cyto'
         '''
-        annotation = await self._get_uniprot_communicator().get_annotation(type).copy() 
+        annotation = await self._get_uniprot_communicator().get_annotation(type) 
         #annotation.columns = ['From']
         logger.debug(f'\n{annotation.head()}')
-        return annotation
+        return annotation.copy()
     
 
     # implement abstract method
@@ -53,6 +53,13 @@ class WebProcessor(Processor):
         except OSError as error: 
             logger.error(error)
         return results_path
+    
+
+    # overriding method of super class
+    def _write_args(self, path):
+        super()._write_args(path)
+        with open(os.path.join(path, 'log.txt'), 'a') as f:
+            f.write('Failed id mapping: ' + str(self._get_uniprot_communicator().get_failed_id_mapping()) + '\n')
 
     
     # implement abstract method
@@ -64,7 +71,7 @@ class WebProcessor(Processor):
         logger.info(f'Results saved at {self.__uuid}')
         shutil.make_archive(f'../results/{self.__uuid}/results', 'zip', root_dir=f'../results/{self.__uuid}/results')
         #shutil.rmtree(f'../results/{self.__uuid}/results')
-        return  self.__uuid
+        return  self.__uuid, self._get_uniprot_communicator().get_failed_id_mapping()
 
 
     

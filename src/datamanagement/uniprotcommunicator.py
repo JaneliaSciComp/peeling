@@ -35,6 +35,7 @@ class UniProtCommunicator(ABC):
         self.__client = None
         self.__annotation_surface = None
         self.__annotation_cyto = None
+        self.__failed_id_mapping = None
     
 
     def __create_client(self):
@@ -180,6 +181,7 @@ class UniProtCommunicator(ABC):
             else:
                 retrieved_ids += len(item)
                 results_list_filtered.append(item)
+        self.__failed_id_mapping = failed_ids
 
         logger.info(f'Retrieved {retrieved_ids} ids, {max(len(old_ids) - retrieved_ids, 0)} ids didn\'t find id mapping data, {failed_ids} ids failed for id mapping')
         logger.info(f'{datetime.now()-start_time} for id mapping')
@@ -245,6 +247,12 @@ class UniProtCommunicator(ABC):
     
 
     async def _retrieve_annotation(self):
+        # for dev stage
+        self.__annotation_surface = pd.read_table('../retrieved_data/annotation_surface.tsv', sep='\t')
+        self.__annotation_cyto = pd.read_table('../retrieved_data/annotation_cyto.tsv', sep='\t')
+        logger.debug(f'\n{self.__annotation_surface.head()}')
+        return
+
         start_time = datetime.now()
 
         if self.__client is None:
@@ -258,10 +266,6 @@ class UniProtCommunicator(ABC):
       
 
     async def get_annotation(self, type):
-        # for dev stage
-        # self.__annotation_surface = pd.read_table('../retrieved_data/annotation_surface.tsv', sep='\t')
-        # self.__annotation_cyto = pd.read_table('../retrieved_data/annotation_cyto.tsv', sep='\t')
-
         if self.__annotation_surface is None or self.__annotation_cyto is None:
                 await self._retrieve_annotation()
         if type=='surface':
@@ -273,3 +277,7 @@ class UniProtCommunicator(ABC):
     def _shorten_annotation(self):
         self.__annotation_surface = self.__annotation_surface[['Entry']]
         self.__annotation_cyto = self.__annotation_cyto[['Entry']]
+    
+
+    def get_failed_id_mapping(self):
+        return self.__failed_id_mapping
