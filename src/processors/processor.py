@@ -6,6 +6,7 @@ from sklearn.metrics import auc
 import os
 from abc import ABC, abstractmethod
 import logging
+import re
 
 logger = logging.getLogger('peeling')
 
@@ -16,6 +17,13 @@ class Processor(ABC):
         self.__uniprot_communicator = uniprot_communicator
         
     
+    def __mass_data_clean(self, data):
+        data = data.dropna(axis=0, how='any')
+        logger.info(f'After dropping rows with missing value: {len(data)}')
+        data.columns = [re.sub('[^a-zA-Z0-9_]', '_', name) for name in data.columns]
+        return data
+
+
     @abstractmethod
     def _get_id_mapping_data(self, data):
         raise NotImplemented()
@@ -77,16 +85,16 @@ class Processor(ABC):
         col_name = data.columns[col_to_sort]
         data.sort_values(by=[col_name], ascending=False, inplace=True)
         
-        TPR_col_name = "TPR_" + col_name 
-        FPR_col_name = "FPR_" + col_name
+        TPR_col_name = "TPR" #"TPR_" + col_name 
+        FPR_col_name = "FPR" #"FPR_" + col_name
         data[[TPR_col_name, FPR_col_name]] = data[['TP', 'FP']].cumsum()
         data[TPR_col_name] = data[TPR_col_name] / data['TP'].sum()
         data[FPR_col_name] = data[FPR_col_name] / data['FP'].sum()
-        data['TPR-FPR_'+col_name] = data[TPR_col_name] - data[FPR_col_name]
+        data['TPR-FPR'] = data[TPR_col_name] - data[FPR_col_name] #_'+col_name
         return data
     
 
-    def __plot_line(self, data, output_dir):
+    def __plot_line(self, data, output_dir, col_index):
         '''
         Make line plot of the last three columns (TPR, FPR, TPR-FPR)
         '''
@@ -95,8 +103,8 @@ class Processor(ABC):
         data[col_list].plot(use_index=False, ) #xticks = []
         
         plt.xlabel('Rank')
-        plt.title('TPR, FPR, TPR-FPR_'+col_list[0][4:])
-        fig_name = f'TPR_FPR_{col_list[0][4:]}'
+        plt.title('TPR, FPR, TPR-FPR')
+        fig_name = f'TPR_FPR_{data.columns[col_index]}'
         plt.savefig(f'{output_dir}/{fig_name}.{self.__user_input_reader.get_plot_format()}')
         return plt, fig_name
     
@@ -106,7 +114,7 @@ class Processor(ABC):
         raise NotImplemented()
     
 
-    def __filter_by_max_TPR_FPR_diff(self, data):
+    def __filter_by_max_TPR_FPR_diff(self, data, col_index):
         '''
         Set cut-off point to be the point with the maximal TPR-FPR; Set include = True if before or at this pos, False otherwise
         Return FPR, TPR of the cut-off point
@@ -114,27 +122,27 @@ class Processor(ABC):
         cut_off_pos = data.iloc[:, -1].argmax()
         #print(cut_off_pos, data.iloc[cut_off_pos, -1])
         
-        col_name = 'include_' + data.columns[-1][8:]
+        col_name = 'include_' + data.columns[col_index][8:]
         data[col_name] = True
         data.iloc[cut_off_pos + 1:, -1] = False
         #print(data.head())
         return data.iloc[cut_off_pos, -3], data.iloc[cut_off_pos, -4]
     
     
-    def __plot_roc(self, data, cutoff_fpr, cutoff_tpr, output_dir):
+    def __plot_roc(self, data, cutoff_fpr, cutoff_tpr, output_dir, col_index):
         '''
         Make ROC, calculate AUC, label the cut off point
         '''
         fig, ax = plt.subplots()
         ax.plot(data.iloc[:, -3], data.iloc[:, -4])
         ax.set_aspect('equal')
-        plt.title('ROC_'+data.columns[-3][4:])
+        plt.title('ROC') #_'+data.columns[-3][4:]
         plt.xlabel('FPR')
         plt.ylabel('TPR')
         plt.text(0, 0.9, 'AUC = ' + str(round(auc(data.iloc[:, -3], data.iloc[:, -4]), 2)))
         plt.plot(cutoff_fpr, cutoff_tpr, marker='o', color='r')
         ax.annotate('Cut-off Point\nFPR='+str(round(cutoff_fpr,3))+'\nTPR='+str(round(cutoff_tpr,3)), (cutoff_fpr+0.05, cutoff_tpr-0.15))
-        fig_name = f'ROC_{data.columns[-3][4:]}'
+        fig_name = f'ROC_{data.columns[col_index]}'
         plt.savefig(f'{output_dir}/{fig_name}.{self.__user_input_reader.get_plot_format()}')
         return plt, fig_name
     
@@ -152,10 +160,10 @@ class Processor(ABC):
         
         for i in range(start_col, start_col + total_col):
             self.__calculate_TPR_FPR_diff(data, i)
-            plt, fig_name = self.__plot_line(data, plots_path)
+            plt, fig_name = self.__plot_line(data, plots_path, i)
             self._plot_supplemental(plt, fig_name)
-            cutoff_fpr, cutoff_tpr = self.__filter_by_max_TPR_FPR_diff(data)
-            plt, fig_name = self.__plot_roc(data, cutoff_fpr, cutoff_tpr, plots_path)
+            cutoff_fpr, cutoff_tpr = self.__filter_by_max_TPR_FPR_diff(data, i)
+            plt, fig_name = self.__plot_roc(data, cutoff_fpr, cutoff_tpr, plots_path, i)
             self._plot_supplemental(plt, fig_name)
             data.drop(data.columns[-4:-1], axis=1, inplace=True)
         
@@ -178,6 +186,7 @@ class Processor(ABC):
         id_col = data.columns[0]
         data.rename(columns={id_col: 'From'}, inplace=True)
         
+        data = self.__mass_data_clean(data)
         id_mapping_data = await self._get_id_mapping_data(data)
         data = self._merge_id(data, id_mapping_data)
         #id_mapping_data = self._get_id_mapping_data_annotation()
