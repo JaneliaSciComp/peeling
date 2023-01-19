@@ -38,15 +38,24 @@ class WebUniProtCommunicator(UniProtCommunicator):
         if len(to_retrieve) > 0:
             retrieved_data = await self._retrieve_latest_id(list(to_retrieve), meta)
             # add ids that didn't find mapping data to cached ids, all fields are NaN
-            no_mapping_ids = meta['no_id_mapping']
+            retrieved_data = self.__add_no_mapping_ids(retrieved_data, meta)
+            logger.debug(f'\n{retrieved_data.head()}')
+
+            self.__ids = pd.concat([self.__ids, retrieved_data])
+            logger.info(f'after retrieve, cached ids: {len(self.__ids)}')
+        return self.__ids[self.__ids['From'].isin(old_ids)]
+
+
+    def __add_no_mapping_ids(self, retrieved_data, meta):
+        # add ids that didn't find mapping data to cached ids, all fields are NaN
+        no_mapping_ids = meta['no_id_mapping']
+        if len(no_mapping_ids) > 0:
             no_mapping_ids = pd.DataFrame(list(no_mapping_ids), columns = ['From'])
             for col in retrieved_data.columns[1:]:
                 no_mapping_ids[col] = np.NaN
-            logger.debug(f'\n{retrieved_data.head()}')
+            retrieved_data = pd.concat([retrieved_data, no_mapping_ids])
             logger.debug(f'\n{no_mapping_ids.head()}')
-            self.__ids = pd.concat([self.__ids, retrieved_data, no_mapping_ids])
-            logger.info(f'after retrieve, cached ids: {len(self.__ids)}')
-        return self.__ids[self.__ids['From'].isin(old_ids)]
+        return retrieved_data
 
 
     # overriding super class method
@@ -61,6 +70,7 @@ class WebUniProtCommunicator(UniProtCommunicator):
         meta={}
         if self.__ids is not None:
             updated_ids = await self._retrieve_latest_id(list(self.__ids['From']), meta)
+            updated_ids = self.__add_no_mapping_ids(updated_ids, meta)
             num_diff = len(set(updated_ids['Entry']).difference(set(self.__ids['Entry'])))
             logger.info(f'{num_diff} ids are updated')
             self.__ids = updated_ids
