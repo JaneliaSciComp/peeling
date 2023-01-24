@@ -130,6 +130,5 @@ class CliProcessor(Processor):
         if self._get_user_input_reader().get_save():
             self.__ids.to_csv(self.__path+'/latest_ids.tsv', sep='\t', index=False)
         self._write_args(parent_path)
-        logger.info(f'Results saved at {parent_path}')
-
+        return parent_path
    

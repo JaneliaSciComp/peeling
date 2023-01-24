@@ -1,0 +1,144 @@
+name	taxon_id	short_name	version	long_name
+human	9606	HUMAN	Reference Proteome 2021_03	Homo sapiens
+mouse	10090	MOUSE	Reference Proteome 2021_03	Mus musculus
+rat	10116	RAT	Reference Proteome 2021_03	Rattus norvegicus
+chicken	9031	CHICK	Reference Proteome 2021_03	Gallus gallus
+zebrafish	7955	DANRE	Reference Proteome 2021_03	Danio rerio
+fruit_fly	7227	DROME	Reference Proteome 2021_03	Drosophila melanogaster
+nematode_worm	6239	CAEEL	Reference Proteome 2021_03	Caenorhabditis elegans
+budding_yeast	559292	YEAST	Reference Proteome 2021_03	Saccharomyces cerevisiae
+fission_yeast	284812	SCHPO	Reference Proteome 2021_03	Schizosaccharomyces pombe
+dictyostelium	44689	DICDI	Reference Proteome 2021_03	Dictyostelium discoideum
+arabidopsis	3702	ARATH	Reference Proteome 2021_03	Arabidopsis thaliana
+e_coli	83333	ECOLI	Reference Proteome 2021_03	Escherichia coli
+aspergillus	227321	EMENI	Reference Proteome 2021_03	Emericella nidulans
+Amborella	13333	AMBTC	Reference Proteome 2021_03	Amborella trichopoda
+lizard	28377	ANOCA	Reference Proteome 2021_03	Anolis carolinensis
+mosquito	7165	ANOGA	Reference Proteome 2021_03	Anopheles gambiae
+aquifex	224324	AQUAE	Reference Proteome 2021_03	Aquifex aeolicus
+ashbya	284811	ASHGO	Reference Proteome 2021_03	Ashbya gossypii
+bacillus_cereus	226900	BACCR	Reference Proteome 2021_03	Bacillus cereus
+bacillus_subtilis	224308	BACSU	Reference Proteome 2021_03	Bacillus subtilis
+bacteroidetes	226186	BACTN	Reference Proteome 2021_03	Bacteroides thetaiotaomicron
+chytrid	684364	BATDJ	Reference Proteome 2021_03	Batrachochytrium dendrobatidis
+cow	9913	BOVIN	Reference Proteome 2021_03	Bos taurus
+purple_false_brome	15368	BRADI	Reference Proteome 2021_03	Brachypodium distachyon
+bradyrhizobium	224911	BRADU	Reference Proteome 2021_03	Bradyrhizobium diazoefficiens
+branchiostoma	7739	BRAFL	Reference Proteome 2021_03	Branchiostoma floridae
+canola	3708	BRANA	Reference Proteome 2021_03	Brassica napus
+cabbage	51351	BRARP	Reference Proteome 2021_03	Brassica rapa subsp. pekinensis
+c_briggsae	6238	CAEBR	Reference Proteome 2021_03	Caenorhabditis briggsae
+candida	237561	CANAL	Reference Proteome 2021_03	Candida albicans
+dog	9615	CANLF	Reference Proteome 2021_03	Canis lupus familiaris
+bell pepper	4072	CAPAN	Reference Proteome 2021_03	Capsicum annuum
+chlamydia	272561	CHLTR	Reference Proteome 2021_03	Chlamydia trachomatis
+green_algae	3055	CHLRE	Reference Proteome 2021_03	Chlamydomonas reinhardtii
+chloroflexus	324602	CHLAA	Reference Proteome 2021_03	Chloroflexus aurantiacus
+ciona	7719	CIOIN	Reference Proteome 2021_03	Ciona intestinalis
+orange	2711	CITSI	Reference Proteome 2021_03	Citrus sinensis
+clostridium	441771	CLOBH	Reference Proteome 2021_03	Clostridium botulinum
+coxiella	227377	COXBU	Reference Proteome 2021_03	Coxiella burnetii
+cryptococcus	214684	CRYNJ	Reference Proteome 2021_03	Cryptococcus neoformans
+cucumber	3659	CUCSA	Reference Proteome 2021_03	Cucumis sativus
+water_flea	6669	DAPPU	Reference Proteome 2021_03	Daphnia pulex
+deinococcus	243230	DEIRA	Reference Proteome 2021_03	Deinococcus radiodurans
+dictyoglomus	515635	DICTD	Reference Proteome 2021_03	Dictyoglomus turgidum
+d_purpureum	5786	DICPU	Reference Proteome 2021_03	Dictyostelium purpureum
+entamoeba	5759	ENTHI	Reference Proteome 2021_03	Entamoeba histolytica
+horse	9796	HORSE	Reference Proteome 2021_03	Equus caballus
+yellow monkey flower	4155	ERYGU	Reference Proteome 2021_03	Erythranthe guttata
+flooded gum	71139	EUCGR	Reference Proteome 2021_03	Eucalyptus grandis
+cat	9685	FELCA	Reference Proteome 2021_03	Felis catus
+fusobacterium	190304	FUSNN	Reference Proteome 2021_03	Fusobacterium nucleatum
+geobacter	243231	GEOSL	Reference Proteome 2021_03	Geobacter sulfurreducens
+giardia	184922	GIAIC	Reference Proteome 2021_03	Giardia intestinalis
+gloeobacter	251221	GLOVI	Reference Proteome 2021_03	Gloeobacter violaceus
+soybean	3847	SOYBN	Reference Proteome 2021_03	Glycine max
+gorilla	9595	GORGO	Reference Proteome 2021_03	Gorilla gorilla gorilla
+cotton	3635	GOSHI	Reference Proteome 2021_03	Gossypium hirsutum
+h_flu	71421	HAEIN	Reference Proteome 2021_03	Haemophilus influenzae
+halobacterium	64091	HALSA	Reference Proteome 2021_03	Halobacterium salinarum
+sunflower	4232	HELAN	Reference Proteome 2021_03	Helianthus annuus
+h_pylori	85962	HELPY	Reference Proteome 2021_03	Helicobacter pylori
+barley	112509	HORVV	Reference Proteome 2021_03	Hordeum vulgare subsp. vulgare
+tick	6945	IXOSC	Reference Proteome 2021_03	Ixodes scapularis
+english walnut	51240	JUGRE	Reference Proteome 2021_03	Juglans regia
+green algae	105231	KLENI	Reference Proteome 2021_03	Klebsormidium nitens
+korarchaeum	374847	KORCO	Reference Proteome 2021_03	Korarchaeum cryptofilum
+garden lettuce	4236	LACSA	Reference Proteome 2021_03	Lactuca sativa
+leishmania	5664	LEIMA	Reference Proteome 2021_03	Leishmania major
+leptospira	189518	LEPIN	Reference Proteome 2021_03	Leptospira interrogans
+listeria	169963	LISMO	Reference Proteome 2021_03	Listeria monocytogenes
+macacque	9544	MACMU	Reference Proteome 2021_03	Macaca mulatta
+cassava	3983	MANES	Reference Proteome 2021_03	Manihot esculenta
+liverwort	3197	MARPO	Reference Proteome 2021_03	Marchantia polymorpha
+barrel medic	3880	MEDTR	Reference Proteome 2021_03	Medicago truncatula
+methanocaldococcus	243232	METJA	Reference Proteome 2021_03	Methanocaldococcus jannaschii
+methanosarcina	188937	METAC	Reference Proteome 2021_03	Methanosarcina acetivorans
+opossum	13616	MONDO	Reference Proteome 2021_03	Monodelphis domestica
+monosiga	81824	MONBE	Reference Proteome 2021_03	Monosiga brevicollis
+banana	214687	MUSAM	Reference Proteome 2021_03	Musa acuminata subsp. malaccensis
+mycobacterium	83332	MYCTU	Reference Proteome 2021_03	Mycobacterium tuberculosis
+meningococcus	122586	NEIMB	Reference Proteome 2021_03	Neisseria meningitidis serogroup b
+sacred lotus	4432	NELNU	Reference Proteome 2021_03	Nelumbo nucifera
+nematostella	45351	NEMVE	Reference Proteome 2021_03	Nematostella vectensis
+aspergillus	330879	ASPFU	Reference Proteome 2021_03	Neosartorya fumigata
+neurospora	367110	NEUCR	Reference Proteome 2021_03	Neurospora crassa
+tobacco	4097	TOBAC	Reference Proteome 2021_03	Nicotiana tabacum
+nitrosopumilu	436308	NITMS	Reference Proteome 2021_03	Nitrosopumilus maritimus
+platypus	9258	ORNAN	Reference Proteome 2021_03	Ornithorhynchus anatinus
+rice	39947	ORYSJ	Reference Proteome 2021_03	Oryza sativa
+oryzias	8090	ORYLA	Reference Proteome 2021_03	Oryzias latipes
+chimpanzee	9598	PANTR	Reference Proteome 2021_03	Pan troglodytes
+paramecium	5888	PARTE	Reference Proteome 2021_03	Paramecium tetraurelia
+phaeosphaeria	321614	PHANO	Reference Proteome 2021_03	Phaeosphaeria nodorum
+moss	3218	PHYPA	Reference Proteome 2021_03	Physcomitrella patens
+phytophthora	164328	PHYRM	Reference Proteome 2021_03	Phytophthora ramorum
+plasmodium	36329	PLAF7	Reference Proteome 2021_03	Plasmodium falciparum
+black_cottonwood	3694	POPTR	Reference Proteome 2021_03	Populus trichocarpa
+pristionchus	54126	PRIPA	Reference Proteome 2021_03	Pristionchus pacificus
+peach	3760	PRUPE	Reference Proteome 2021_03	Prunus persica
+pseudomonas	208964	PSEAE	Reference Proteome 2021_03	Pseudomonas aeruginosa
+puccinia	418459	PUCGT	Reference Proteome 2021_03	Puccinia graminis
+pyrobaculum	178306	PYRAE	Reference Proteome 2021_03	Pyrobaculum aerophilum
+rhodopirellula	243090	RHOBA	Reference Proteome 2021_03	Rhodopirellula baltica
+bean	3988	RICCO	Reference Proteome 2021_03	Ricinus communis
+salmonella	99287	SALTY	Reference Proteome 2021_03	Salmonella typhimurium
+s_japonicus	402676	SCHJY	Reference Proteome 2021_03	Schizosaccharomyces japonicus
+sclerotinia	665079	SCLS1	Reference Proteome 2021_03	Sclerotinia sclerotiorum
+spikemoss	88036	SELML	Reference Proteome 2021_03	Selaginella moellendorffii
+millet	4555	SETIT	Reference Proteome 2021_03	Setaria italica
+shewanella	211586	SHEON	Reference Proteome 2021_03	Shewanella oneidensis
+tomato	4081	SOLLC	Reference Proteome 2021_03	Solanum lycopersicum
+potato	4113	SOLTU	Reference Proteome 2021_03	Solanum tuberosum
+sorghum	4558	SORBI	Reference Proteome 2021_03	Sorghum bicolor
+spinach	3562	SPIOL	Reference Proteome 2021_03	Spinacia oleracea
+staph	93061	STAA8	Reference Proteome 2021_03	Staphylococcus aureus
+strep	171101	STRR6	Reference Proteome 2021_03	Streptococcus pneumoniae
+streptomyces	100226	STRCO	Reference Proteome 2021_03	Streptomyces coelicolor
+sea_urchin	7668	STRPU	Reference Proteome 2021_03	Strongylocentrotus purpuratus
+sulfolobus	273057	SACS2	Reference Proteome 2021_03	Sulfolobus solfataricus
+pig	9823	PIG	Reference Proteome 2021_03	Sus scrofa
+synechocystis	1111708	SYNY3	Reference Proteome 2021_03	Synechocystis
+thalassiosira	35128	THAPS	Reference Proteome 2021_03	Thalassiosira pseudonana
+cacao	3641	THECC	Reference Proteome 2021_03	Theobroma cacao
+thermococcus	69014	THEKO	Reference Proteome 2021_03	Thermococcus kodakaraensis
+thermodesulfovibrio	289376	THEYD	Reference Proteome 2021_03	Thermodesulfovibrio yellowstonii
+thermotoga	243274	THEMA	Reference Proteome 2021_03	Thermotoga maritima
+tribolium	7070	TRICA	Reference Proteome 2021_03	Tribolium castaneum
+trichomonas	5722	TRIVA	Reference Proteome 2021_03	Trichomonas vaginalis
+trichoplax	10228	TRIAD	Reference Proteome 2021_03	Trichoplax adhaerens
+wheat	4565	WHEAT	Reference Proteome 2021_03	Triticum aestivum
+t_brucei	185431	TRYB2	Reference Proteome 2021_03	Trypanosoma brucei
+ustilago	237631	USTMA	Reference Proteome 2021_03	Ustilago maydis
+cholera	243277	VIBCH	Reference Proteome 2021_03	Vibrio cholerae
+grape	29760	VITVI	Reference Proteome 2021_03	Vitis vinifera
+xanthomonas	190485	XANCP	Reference Proteome 2021_03	Xanthomonas campestris
+frog	8364	XENTR	Reference Proteome 2021_03	Xenopus tropicalis
+yarrowia	284591	YARLI	Reference Proteome 2021_03	Yarrowia lipolytica
+yersinia	632	YERPE	Reference Proteome 2021_03	Yersinia pestis
+maize	4577	MAIZE	Reference Proteome 2021_03	Zea mays
+eelgrass	29655	ZOSMR	Reference Proteome 2021_03	Zostera marina
+helobdella	6412	HELRO	Reference Proteome 2021_03	helobdella robusta
+lepisosteudae	7918	LEPOC	Reference Proteome 2021_03	lepisosteus oculatus
+m_genitalium	243273	MYCGE	Reference Proteome 2021_03	mycoplasma genitalium

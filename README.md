@@ -52,6 +52,8 @@ python3 main.py mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replic
 
 -a, --cache    Save the data retrieved from UniProt on the local computer, true if specified
 
--p, --plot    The format of the output plots, default is png. Supported formats depend on the computation platform, use -h/--help to see supported formats
+-f, --format    The format of the output plots, default is png. Supported formats depend on the computation platform, use -h/--help to see supported formats
 
 -n, --nomap    No id mapping for local annotation files, true if specified
+
+-p, --panther    The organism from which the mass spec data is made, a required input for Panther enrichment analysis. Supported organisms depend on Panther, use -h/--help to see supported organisms

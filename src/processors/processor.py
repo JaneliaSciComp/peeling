@@ -173,7 +173,11 @@ class Processor(ABC):
         surface_proteins = pd.DataFrame(data[data[col_name] >= threshold].index).dropna(axis=0, how='any')
         surface_proteins.drop_duplicates(keep='first', inplace=True)
         logger.info(f'{len(surface_proteins)} surface proteins found')
-        surface_proteins.to_csv(f'{path}/surface_proteins.tsv', sep='\t', index=False)
+        surface_proteins.to_csv(f'{path}/post-cutoff-proteome.tsv', sep='\t', index=False)
+        # save a txt file containing just surface protein ids separated by ',', so that easily copy to put in other web
+        proteins_str = ','.join(list(surface_proteins['Entry']))
+        with open(f'{path}/post-cutoff-proteome.txt', 'w') as f:
+            f.write(proteins_str)
         
 
     @abstractmethod
