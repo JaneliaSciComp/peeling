@@ -67,8 +67,12 @@ class PantherProcessor(ABC):
 
     def __format_enrich(self, response):
         try:
-            results_json = response.json()['results']['result']
-            df = pd.json_normalize(results_json)
+            results_json = response.json()
+            if 'results' not in results_json:
+                logger.error(results_json['search']['error'])
+                raise Exception(results_json['search']['error'])
+            results = results_json['results']['result']
+            df = pd.json_normalize(results)
             logger.debug(df.head())
             
             logger.debug(len(df))

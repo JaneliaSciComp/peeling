@@ -159,43 +159,47 @@ class UniProtCommunicator(ABC):
         if self.__client is None:
             self.__create_client()
 
+        try:
         # divide old_ids into chunks
-        num_chunks = len(old_ids) // CHUNK_SIZE
-        residual = len(old_ids) % CHUNK_SIZE
-        num_chunks += 1 if residual>0 else 0
-        chunks = [old_ids[CHUNK_SIZE*i:CHUNK_SIZE*(i+1)] if i<(num_chunks-1) else old_ids[CHUNK_SIZE*i:] for i in range(num_chunks)]
-        logger.info(f'{len(old_ids)} ids are divided into {num_chunks} chunks with size {CHUNK_SIZE}')
-        logger.info('Communicating with UniProt for id mapping...')
+            num_chunks = len(old_ids) // CHUNK_SIZE
+            residual = len(old_ids) % CHUNK_SIZE
+            num_chunks += 1 if residual>0 else 0
+            chunks = [old_ids[CHUNK_SIZE*i:CHUNK_SIZE*(i+1)] if i<(num_chunks-1) else old_ids[CHUNK_SIZE*i:] for i in range(num_chunks)]
+            logger.info(f'{len(old_ids)} ids are divided into {num_chunks} chunks with size {CHUNK_SIZE}')
+            logger.info('Communicating with UniProt for id mapping...')
 
-        results_list = await asyncio.gather(*map(self.__retrieve_latest_id_chunk, chunks)) 
-        await self.__client.aclose()
-        self.__client = None
+            results_list = await asyncio.gather(*map(self.__retrieve_latest_id_chunk, chunks)) 
 
-        failed_ids = 0
-        no_mapping_ids_set = set()
-        retrieved_ids = 0
-        results_list_filtered = []
-        logger.debug('results_list', len(results_list))
-        for i, item in enumerate(results_list): #item may be list df or integer (len(chunk)) if mapping failed
-            logger.debug('i ', i)
-            if isinstance(item, int):
-                failed_ids += item
-            else:
-                retrieved_ids += len(item)
-                results_list_filtered.append(item)
-                if len(chunks[i]) > len(item): # there are ids that didn't find mapping data
-                    if len(item)>0:
-                        no_mapping_ids_set = no_mapping_ids_set.union(set(chunks[i]).difference(set(item.iloc[:, 0])))
-                    else: #all ids in this chunk didn't find mapping data
-                        no_mapping_ids_set = no_mapping_ids_set.union(set(chunks[i]))
-                    logger.debug(no_mapping_ids_set)
+            failed_ids = 0
+            no_mapping_ids_set = set()
+            retrieved_ids = 0
+            results_list_filtered = []
+            logger.debug('results_list', len(results_list))
+            for i, item in enumerate(results_list): #item may be list df or integer (len(chunk)) if mapping failed
+                logger.debug('i ', i)
+                if isinstance(item, int):
+                    failed_ids += item
+                else:
+                    retrieved_ids += len(item)
+                    results_list_filtered.append(item)
+                    if len(chunks[i]) > len(item): # there are ids that didn't find mapping data
+                        if len(item)>0:
+                            no_mapping_ids_set = no_mapping_ids_set.union(set(chunks[i]).difference(set(item.iloc[:, 0])))
+                        else: #all ids in this chunk didn't find mapping data
+                            no_mapping_ids_set = no_mapping_ids_set.union(set(chunks[i]))
+                        logger.debug(no_mapping_ids_set)
 
-        meta['failed_id_mapping'] = failed_ids
-        meta['no_id_mapping'] = no_mapping_ids_set
-        logger.info(f'Retrieved {retrieved_ids} ids, {len(no_mapping_ids_set)} ids didn\'t find id mapping data, {failed_ids} ids failed for id mapping')
-        logger.info(f'{datetime.now()-start_time} for id mapping')
-        
-        return pd.concat(results_list_filtered)
+            meta['failed_id_mapping'] = failed_ids
+            meta['no_id_mapping'] = no_mapping_ids_set
+            logger.info(f'Retrieved {retrieved_ids} ids, {len(no_mapping_ids_set)} ids didn\'t find id mapping data, {failed_ids} ids failed for id mapping')
+            logger.info(f'{datetime.now()-start_time} for id mapping')
+            
+            return pd.concat(results_list_filtered)
+        except Exception:
+            raise
+        finally:
+            await self.__client.aclose()
+            self.__client = None
 
 
     async def __retrieve_latest_id_chunk(self, chunk):
@@ -234,8 +238,6 @@ class UniProtCommunicator(ABC):
         except Exception as e:
             logger.error(e)
             logger.info(f'Retrieved annotation_surface failed')
-            # logger.error('Retry _retrieve_annotation_surface()')
-            # self._retrieve_annotation_surface()
             raise   
 
 
@@ -250,28 +252,28 @@ class UniProtCommunicator(ABC):
         except Exception as e:
             logger.error(e)
             logger.info(f'Retrieved annotation_cyto failed')
-            # logger.error('Retry _retrieve_annotation_cyto()')
-            # self._retrieve_annotation_cyto()
             raise
     
 
     async def _retrieve_annotation(self):
         # for dev stage
         # self.__annotation_surface = pd.read_table('../retrieved_data/annotation_surface.tsv', sep='\t')
-        # self.__annotation_cyto = pd.read_table('../retrieved_data/annotation_cyto.tsv', sep='\t')
-        # logger.debug(f'\n{self.__annotation_surface.head()}')
-        # return
+#         self.__annotation_cyto = pd.read_table('../retrieved_data/annotation_cyto.tsv', sep='\t')
+#         logger.debug(f'\n{self.__annotation_surface.head()}')
+#         return
 
         start_time = datetime.now()
 
         if self.__client is None:
             self.__create_client()
-        
-        await asyncio.gather(self.__retrieve_annotation_surface(), self.__retrieve_annotation_cyto()) 
-        await self.__client.aclose()
-        self.__client = None
-
-        logger.info(f'{datetime.now()-start_time} for retrieving annotations')
+        try:
+            await asyncio.gather(self.__retrieve_annotation_surface(), self.__retrieve_annotation_cyto()) 
+            logger.info(f'{datetime.now()-start_time} for retrieving annotations')
+        except Exception:
+            raise
+        finally:
+            await self.__client.aclose()
+            self.__client = None
       
 
     async def get_annotation(self, type):

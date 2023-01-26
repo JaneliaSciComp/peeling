@@ -123,10 +123,9 @@ class Processor(ABC):
         cut_off_pos = data.iloc[:, -1].argmax()
         #print(cut_off_pos, data.iloc[cut_off_pos, -1])
         
-        col_name = 'include_' + data.columns[col_index][8:]
+        col_name = 'include_' + data.columns[col_index]
         data[col_name] = True
         data.iloc[cut_off_pos + 1:, -1] = False
-        #print(data.head())
         return data.iloc[cut_off_pos, -3], data.iloc[cut_off_pos, -4]
     
     
