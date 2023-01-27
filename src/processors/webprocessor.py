@@ -5,6 +5,7 @@ import shutil
 import uuid
 import logging
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 logger = logging.getLogger('peeling')
@@ -16,6 +17,19 @@ class WebProcessor(Processor):
         self.__uuid = None
         self.__web_plots_path = None
         self.__failed_id_mapping = 0
+    
+
+    def __init__(self, unique_id, x, y):
+        self.__uuid = unique_id
+        self.__x = x
+        self.__y = y
+
+
+    #override superclass method
+    def _mass_data_clean(self, data): #TODO: test
+        data = super()._mass_data_clean(data)
+        data.to_csv(f'../results/{self.__uuid}/mass_spec_data.tsv', sep='\t', index=False) 
+        print('subclass _mass_data_clean called')
 
 
     # implement abstract method
@@ -79,6 +93,55 @@ class WebProcessor(Processor):
         return  self.__uuid, self.__failed_id_mapping
 
 
-    
+    def plot_scatter(self):
+        try:
+            parent_path = os.path.join('../results/', self.__uuid)
+            results_plot_path = os.path.join(parent_path, '/results/plots/')
+            data_path = os.path.join(parent_path, '/mass_spec_data.tsv')
+            web_plot_path = os.path.join(parent_path, '/web_plots/')
+            plot_format = self.__get_format_from_log()
+
+            data = pd.read_table(data_path, sep='\t', header=0)
+            print(data.head())
+
+            corr = data[self.__x].corr(data[self.__y])
+            print(corr)
+            lower_bound = min(data[self.__x].min(), data[self.__y].min())-0.5
+            upper_bound = max(data[self.__x].max(), data[self.__y].max())+0.5
+            print(lower_bound, upper_bound)
+
+            fig, ax = plt.subplots()
+            ax.scatter(data[self.__x], data[self.__y], linewidths=0.5, edgecolors='white')
+            # ax.set_xlim(lower_bound, upper_bound)
+            # ax.set_ylim(lower_bound, upper_bound)
+            ax.set_aspect('equal')
+            ax.annotate('Pearson r='+str(round(corr,3)), (ax.get_xlim()[0]+0.5, ax.get_ylim()[1]-1))
+            ax.spines[['right', 'top']].set_visible(False)
+            plt.xlabel(self.__x)
+            plt.ylabel(self.__y)
+            title = f'Correlation {self.__x} vs {self.__y}'
+            plt.title(title)
+
+            plt.savefig(f'{results_plot_path}/{title}.{plot_format}', dpi=130)
+            plt.savefig(f'{web_plot_path}/{title}.png', dpi=130)
+            plt.close()
+            return title+'.png'
+        except Exception as e:
+            logger.error(e)
+            raise
+
+
+    def __get_format_from_log(self, results_path):
+        try:
+            with open(os.path.join(results_path, 'log.txt'), 'r') as f:
+                format_line = f.readlines()[4]
+                if format_line.find('Plot format') != -1:
+                    format_line = format_line.strip()
+                return format_line[13:]
+        except Exception as e:
+            logger.error(e)
+            raise
+
+
 
         

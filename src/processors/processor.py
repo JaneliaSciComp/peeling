@@ -18,7 +18,7 @@ class Processor(ABC):
         self.__uniprot_communicator = uniprot_communicator
         
     
-    def __mass_data_clean(self, data):
+    def _mass_data_clean(self, data):
         data = data.dropna(axis=0, how='any')
         logger.info(f'After dropping rows with missing value: {len(data)}')
         data.columns = [re.sub('[^a-zA-Z0-9_]', '_', name) for name in data.columns]
@@ -218,7 +218,7 @@ class Processor(ABC):
         except OSError as error: 
             logger.debug(error)
         
-        data = self.__mass_data_clean(data)
+        data = self._mass_data_clean(data)
         fig_name = self.__make_heatmap(data, plots_path)
         self._plot_supplemental(fig_name)
         id_mapping_data = await self._get_id_mapping_data(data)
