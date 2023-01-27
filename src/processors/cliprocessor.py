@@ -4,6 +4,8 @@ from datetime import datetime
 import pandas as pd
 import logging
 import asyncio
+import matplotlib.pyplot as plt
+
 
 logger = logging.getLogger('peeling')
 
@@ -86,7 +88,7 @@ class CliProcessor(Processor):
 
 
     # implement abstract method
-    def _plot_supplemental(self, plt, fig_name):
+    def _plot_supplemental(self, fig_name):
         plt.close()
 
 

@@ -31,10 +31,17 @@ class WebPantherProcessor(PantherProcessor):
             results_dict_reformat[category] = dict(zip(df['Term'], df['FDR']))
         return results_dict_reformat
 
+
+    #implement abstract method
+    def __write_args(self): 
+        with open(f'{self._get_path()}/log.txt', 'w') as f:
+            f.write(f'Panther organism: {self._get_organism_id()}\n')
+
     
     # implement abstract method
     async def start(self):
         try:
+            self.__write_args()
             self._create_client()
             results_dict = await self._run_enrichment()
             results_dict = self.__reformat_enrich(results_dict)

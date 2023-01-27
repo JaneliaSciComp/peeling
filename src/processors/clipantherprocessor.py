@@ -18,10 +18,17 @@ class CliPantherProcessor(PantherProcessor):
         except AssertionError as e:
             logger.error(e)
             raise
+    
+    
+    #implement abstract method
+    def __write_args(self): 
+        with open(f'{self._get_path()}/log.txt', 'w') as f:
+            f.write(f'Panther organism: {self.__organism}\n')
 
     
     async def _start(self):
         try:
+            self.__write_args()
             self._create_client()
             organism_dict = await self._retrieve_organisms()
             self.__check_organism(organism_dict)

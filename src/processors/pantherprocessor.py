@@ -156,10 +156,23 @@ class PantherProcessor(ABC):
     @abstractmethod
     def start(self):
         raise NotImplemented()
-    
 
+    
+    @abstractmethod
+    def __write_args(self):
+        raise NotImplemented()
+    
+    
     def _set_organism_id(self, id):
         self.__organism_id = id
+    
+
+    def _get_path(self):
+        return self.__path
+    
+
+    def _get_organism_id(self):
+        return self.__organism_id
     
 
     async def _close_client(self):

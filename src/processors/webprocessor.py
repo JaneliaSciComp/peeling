@@ -4,6 +4,8 @@ import os
 import shutil
 import uuid
 import logging
+import matplotlib.pyplot as plt
+
 
 logger = logging.getLogger('peeling')
 
@@ -38,8 +40,8 @@ class WebProcessor(Processor):
     
 
     # implement abstract method
-    def _plot_supplemental(self, plt, fig_name):
-        plt.savefig(f'{self.__web_plots_path}/{fig_name}.png')
+    def _plot_supplemental(self, fig_name): #plt, 
+        plt.savefig(f'{self.__web_plots_path}/{fig_name}.png', dpi=130)
         plt.close()
  
 

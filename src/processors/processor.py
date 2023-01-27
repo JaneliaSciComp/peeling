@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.metrics import auc
 import os
 from abc import ABC, abstractmethod
@@ -23,6 +24,22 @@ class Processor(ABC):
         data.columns = [re.sub('[^a-zA-Z0-9_]', '_', name) for name in data.columns]
         data[data.columns[1:]] = data[data.columns[1:]].astype('float')
         return data
+    
+
+    def __make_heatmap(self, data, plot_path):
+        data.set_index('From', inplace=True)
+        corr = data.corr()
+        #r2 = corr**2
+        #plt.figure()
+        fig, ax = plt.subplots()
+        ax = sns.heatmap(corr, linewidth=0.5, annot=True, cmap="coolwarm", vmin=-1, vmax=1, square=True) 
+        ax.tick_params(left=False, bottom=False)
+        ax.tick_params(axis='x', rotation=45)
+        fig_name = 'Pairwise Pearson Correlation Coefficient'
+        plt.title(fig_name)
+        plt.savefig(f'{plot_path}/{fig_name}.{self.__user_input_reader.get_plot_format()}', bbox_inches='tight', dpi=130)
+        data.reset_index(inplace=True)
+        return fig_name
 
 
     @abstractmethod
@@ -106,8 +123,8 @@ class Processor(ABC):
         plt.xlabel('Rank')
         plt.title('TPR, FPR, TPR-FPR')
         fig_name = f'TPR_FPR_{data.columns[col_index]}'
-        plt.savefig(f'{output_dir}/{fig_name}.{self.__user_input_reader.get_plot_format()}')
-        return plt, fig_name
+        plt.savefig(f'{output_dir}/{fig_name}.{self.__user_input_reader.get_plot_format()}', dpi=130)
+        return fig_name
     
 
     @abstractmethod
@@ -126,13 +143,17 @@ class Processor(ABC):
         col_name = 'include_' + data.columns[col_index]
         data[col_name] = True
         data.iloc[cut_off_pos + 1:, -1] = False
-        return data.iloc[cut_off_pos, -3], data.iloc[cut_off_pos, -4]
+        #return data.iloc[cut_off_pos, -3], data.iloc[cut_off_pos, -4]
+        return cut_off_pos
     
     
-    def __plot_roc(self, data, cutoff_fpr, cutoff_tpr, output_dir, col_index):
+    def __plot_roc(self, data, cut_off_pos, output_dir, col_index):
         '''
         Make ROC, calculate AUC, label the cut off point
         '''
+        cutoff_fpr = data.iloc[cut_off_pos, -3]
+        cutoff_tpr = data.iloc[cut_off_pos, -4]
+        cutoff_protein_id = data.index[cut_off_pos]
         fig, ax = plt.subplots()
         ax.plot(data.iloc[:, -3], data.iloc[:, -4])
         ax.set_aspect('equal')
@@ -141,9 +162,9 @@ class Processor(ABC):
         plt.ylabel('TPR')
         plt.text(0, 0.9, 'AUC = ' + str(round(auc(data.iloc[:, -3], data.iloc[:, -4]), 2)))
         plt.plot(cutoff_fpr, cutoff_tpr, marker='o', color='r')
-        ax.annotate('Cut-off Point\nFPR='+str(round(cutoff_fpr,3))+'\nTPR='+str(round(cutoff_tpr,3)), (cutoff_fpr+0.05, cutoff_tpr-0.15))
+        ax.annotate('Cut-off Rank: '+str(cut_off_pos)+'\nAccession ID: '+cutoff_protein_id +'\nTPR='+str(round(cutoff_tpr,3))+', FPR='+str(round(cutoff_fpr,3)), (cutoff_fpr+0.05, cutoff_tpr-0.15))
         fig_name = f'ROC_{data.columns[col_index]}'
-        plt.savefig(f'{output_dir}/{fig_name}.{self.__user_input_reader.get_plot_format()}')
+        plt.savefig(f'{output_dir}/{fig_name}.{self.__user_input_reader.get_plot_format()}', dpi=130)
         return plt, fig_name
     
 
@@ -160,11 +181,12 @@ class Processor(ABC):
         
         for i in range(start_col, start_col + total_col):
             self.__calculate_TPR_FPR_diff(data, i)
-            plt, fig_name = self.__plot_line(data, plots_path, i)
-            self._plot_supplemental(plt, fig_name)
-            cutoff_fpr, cutoff_tpr = self.__filter_by_max_TPR_FPR_diff(data, i)
-            plt, fig_name = self.__plot_roc(data, cutoff_fpr, cutoff_tpr, plots_path, i)
-            self._plot_supplemental(plt, fig_name)
+            fig_name = self.__plot_line(data, plots_path, i)
+            self._plot_supplemental(fig_name)
+            #cutoff_fpr, cutoff_tpr = self.__filter_by_max_TPR_FPR_diff(data, i)
+            cut_off_pos = self.__filter_by_max_TPR_FPR_diff(data, i)
+            fig_name = self.__plot_roc(data, cut_off_pos, plots_path, i)
+            self._plot_supplemental(fig_name)
             data.drop(data.columns[-4:-1], axis=1, inplace=True)
         
         col_name = 'include_sum'
@@ -189,8 +211,16 @@ class Processor(ABC):
        # num_conditions = self.__user_input_reader.get_num_conditions()
         id_col = data.columns[0]
         data.rename(columns={id_col: 'From'}, inplace=True)
+
+        plots_path = os.path.join(parent_path, "plots") 
+        try: 
+            os.makedirs(plots_path) 
+        except OSError as error: 
+            logger.debug(error)
         
         data = self.__mass_data_clean(data)
+        fig_name = self.__make_heatmap(data, plots_path)
+        self._plot_supplemental(fig_name)
         id_mapping_data = await self._get_id_mapping_data(data)
         data = self._merge_id(data, id_mapping_data)
         #id_mapping_data = self._get_id_mapping_data_annotation()
@@ -198,12 +228,6 @@ class Processor(ABC):
         data = self.__merge_annotation(data, annotation_surface, 'surface')
         annotation_cyto = await self._get_annotation_data('cyto')
         data = self.__merge_annotation(data, annotation_cyto, 'cyto')
-        
-        plots_path = os.path.join(parent_path, "plots") 
-        try: 
-            os.makedirs(plots_path) 
-        except OSError as error: 
-            logger.debug(error)
         
         self.__get_surface_proteins(data, parent_path, plots_path)
     
