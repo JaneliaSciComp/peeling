@@ -19,6 +19,8 @@ class Processor(ABC):
         
     
     def _mass_data_clean(self, data):
+        id_col = data.columns[0]
+        data.rename(columns={id_col: 'From'}, inplace=True)
         data = data.dropna(axis=0, how='any')
         logger.info(f'After dropping rows with missing value: {len(data)}')
         data.columns = [re.sub('[^a-zA-Z0-9_]', '_', name) for name in data.columns]
@@ -34,7 +36,7 @@ class Processor(ABC):
         fig, ax = plt.subplots()
         ax = sns.heatmap(corr, linewidth=0.5, annot=True, cmap="coolwarm", vmin=-1, vmax=1, square=True) 
         ax.tick_params(left=False, bottom=False)
-        ax.tick_params(axis='x', rotation=45)
+        ax.tick_params(axis='x', rotation=50)
         fig_name = 'Pairwise Pearson Correlation Coefficient'
         plt.title(fig_name)
         plt.savefig(f'{plot_path}/{fig_name}.{self.__user_input_reader.get_plot_format()}', bbox_inches='tight', dpi=130)
@@ -165,7 +167,7 @@ class Processor(ABC):
         ax.annotate('Cut-off Rank: '+str(cut_off_pos)+'\nAccession ID: '+cutoff_protein_id +'\nTPR='+str(round(cutoff_tpr,3))+', FPR='+str(round(cutoff_fpr,3)), (cutoff_fpr+0.05, cutoff_tpr-0.15))
         fig_name = f'ROC_{data.columns[col_index]}'
         plt.savefig(f'{output_dir}/{fig_name}.{self.__user_input_reader.get_plot_format()}', dpi=130)
-        return plt, fig_name
+        return fig_name
     
 
     def __get_surface_proteins(self, data, path, plots_path):
@@ -209,16 +211,13 @@ class Processor(ABC):
 
     async def _analyze(self, data, parent_path):
        # num_conditions = self.__user_input_reader.get_num_conditions()
-        id_col = data.columns[0]
-        data.rename(columns={id_col: 'From'}, inplace=True)
-
         plots_path = os.path.join(parent_path, "plots") 
         try: 
             os.makedirs(plots_path) 
         except OSError as error: 
             logger.debug(error)
         
-        data = self._mass_data_clean(data)
+        #data = self._mass_data_clean(data)
         fig_name = self.__make_heatmap(data, plots_path)
         self._plot_supplemental(fig_name)
         id_mapping_data = await self._get_id_mapping_data(data)
