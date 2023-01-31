@@ -147,5 +147,5 @@ class WebProcessor(Processor):
             raise
 
 
-
-        
+    def _get_ids(self):
+        return self._get_uniprot_communicator().get_ids()

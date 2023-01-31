@@ -22,8 +22,8 @@ class CliProcessor(Processor):
         if self._get_user_input_reader().get_latest_ids_filename() is not None:
             # read in local ids file
             self.__ids = self._get_user_input_reader().get_latest_ids()
-            self.__ids = self.__ids.iloc[:, :2] # the first two columns should be old ids and new ids
-            self.__ids.columns = ['From', 'Entry']
+            #self.__ids = self.__ids.iloc[:, :2] # the first two columns should be old ids and new ids
+            self.__ids.columns = ['From', 'Entry'] + list(self.__ids.columns[2:])
         else:
             # get latest ids by communicating with UniProt
             old_ids = list(mass_data.iloc[:, 0])
@@ -134,4 +134,7 @@ class CliProcessor(Processor):
             self.__ids.to_csv(self.__path+'/latest_ids.tsv', sep='\t', index=False)
         self._write_args(parent_path)
         return parent_path
-   
+    
+
+    def _get_ids(self):
+        return self.__ids

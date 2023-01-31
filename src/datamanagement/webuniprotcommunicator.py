@@ -15,11 +15,11 @@ class WebUniProtCommunicator(UniProtCommunicator):
 
 
     # overriding super class method
-    async def _retrieve_latest_id(self, old_ids, meta):
-        results_df = await super()._retrieve_latest_id(old_ids, meta)
-        if len(results_df)>0:
-                results_df = results_df[['From', 'Entry']]
-        return results_df
+    # async def _retrieve_latest_id(self, old_ids, meta):
+    #     results_df = await super()._retrieve_latest_id(old_ids, meta)
+    #     if len(results_df)>0:
+    #             results_df = results_df[['From', 'Entry']]
+    #     return results_df
 
 
     # overriding abstract method
@@ -77,3 +77,7 @@ class WebUniProtCommunicator(UniProtCommunicator):
         await self._retrieve_annotation()
         end_time = datetime.now()
         logger.info(f'Update is done. Time: {end_time-start_time}')
+
+
+    def get_ids(self):
+        return self.__ids

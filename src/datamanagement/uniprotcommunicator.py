@@ -129,8 +129,8 @@ class UniProtCommunicator(ABC):
         query["size"] = size
         compressed = True
         query['compressed'] = compressed
-        if not self.__save:
-            query['fields'] = 'accession'
+        # if not self.__save:
+        #     query['fields'] = 'accession'
         parsed = parsed._replace(query=urlencode(query, doseq=True))
         url = parsed.geturl()
         response = await self.__client.get(url)
@@ -212,8 +212,8 @@ class UniProtCommunicator(ABC):
             results = await self.__get_id_mapping_results_search(link)
             results_df = self.__get_data_frame_from_tsv_results(results)
             logger.info(f'retrieved: {len(results_df)}')
-            if not self.__save and len(results_df)>0:
-                results_df = results_df[['From', 'Entry']]
+            # if not self.__save and len(results_df)>0:
+            #     results_df = results_df[['From', 'Entry']]
             return results_df
         except Exception as e:
             logger.error(e)
@@ -237,7 +237,7 @@ class UniProtCommunicator(ABC):
             self.__annotation_surface = results
         except Exception as e:
             logger.error(e)
-            logger.info(f'Retrieved annotation_surface failed')
+            logger.info(f'Retrieving annotation_surface failed')
             raise   
 
 
@@ -251,7 +251,7 @@ class UniProtCommunicator(ABC):
             self.__annotation_cyto = results
         except Exception as e:
             logger.error(e)
-            logger.info(f'Retrieved annotation_cyto failed')
+            logger.info(f'Retrieving annotation_cyto failed')
             raise
     
 
