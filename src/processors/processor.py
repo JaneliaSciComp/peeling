@@ -197,10 +197,10 @@ class Processor(ABC):
         surface_proteins = pd.DataFrame(data[data[col_name] >= threshold].index).dropna(axis=0, how='any')
         surface_proteins.drop_duplicates(keep='first', inplace=True)
         ids = self._get_ids()
-        print(ids.columns)
+        #print(ids.head())
         surface_proteins = self.__merge_extra_data(surface_proteins, ids)
         surface_proteins.drop_duplicates(keep='first', inplace=True)
-        print(len(surface_proteins))
+        #print(len(surface_proteins))
         logger.info(f'{len(surface_proteins)} surface proteins found')
         surface_proteins.to_csv(f'{path}/post-cutoff-proteome.tsv', sep='\t', index=False)
         # save a txt file containing just surface protein ids separated by ',', so that easily copy to put in other web
@@ -210,15 +210,13 @@ class Processor(ABC):
     
 
     def __merge_extra_data(self, surface_proteins, ids):
-        print(len(surface_proteins), len(ids))
+        #print(len(surface_proteins), len(ids))
         surface_proteins = surface_proteins.merge(ids, how='left', left_on='Entry', right_on='Entry')
-        print(len(surface_proteins), len(ids))
-        print(surface_proteins.head())
-        print(surface_proteins.columns)
-        surface_proteins.drop(['From', 'Entry Name', 'Reviewed'], axis=1, inplace=True)
+        #print(len(surface_proteins), len(ids))
+        surface_proteins.drop(['From'], axis=1, inplace=True)
         surface_proteins = surface_proteins[['Entry', 'Gene Names', 'Protein names', 'Organism', 'Length']]
-        print(surface_proteins.head())
-        print(surface_proteins.columns)
+        #print(surface_proteins.head())
+        #print(self._get_ids().head())
         return surface_proteins
         
 
