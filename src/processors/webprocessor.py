@@ -19,12 +19,15 @@ class WebProcessor(Processor):
             self.__uuid = None
             self.__web_plots_path = None
             self.__failed_id_mapping = 0
+            self.__surface_proteins_raw_data = None
         elif len(args) == 3:
             unique_id, x, y = args
             #print(unique_id,x,y)
             self.__uuid = unique_id
             self.__x = x
             self.__y = y
+        elif len(args) == 1:
+            self.__uuid = args[0]
 
 
     #override superclass method
@@ -90,6 +93,7 @@ class WebProcessor(Processor):
         results_path = self._construct_path()
         data = self._mass_data_clean(data)
         await self._analyze(data, results_path)
+        self.__surface_proteins_raw_data.to_csv(f'../results/{self.__uuid}/post-cutoff-proteome_with_raw_data.tsv', sep='\t', index=False)
         self._write_args(results_path)
         logger.info(f'Results saved at {self.__uuid}')
         shutil.make_archive(f'../results/{self.__uuid}/results', 'zip', root_dir=f'../results/{self.__uuid}/results')
@@ -147,5 +151,21 @@ class WebProcessor(Processor):
             raise
 
 
-    def _get_ids(self):
-        return self._get_uniprot_communicator().get_ids()
+    # def _get_ids(self):
+    #     return self._get_uniprot_communicator().get_ids()
+    
+
+    # def __save_results_with_raw_data(self, data):
+    #     parent_path = f'../results/{self.__uuid}'
+    #     results_path = f'{parent_path}/results/post-cutoff-proteome.tsv'
+    #     results = pd.read_table(results_path, sep='\t', header=0)
+    #     data.drop_duplicates(subset=['From'], keep='first', inplace=True)
+    #     print(len(results), len(data))
+    #     results_with_data = results.merge(data, how='left', left_on='Entry', right_on='From')
+    #     print(len(results_with_data), len(data))
+    #     print(results_with_data.head())
+    #     results_with_data.to_csv(f'{parent_path}/post-cutoff-proteome_with_raw_data.tsv', sep='\t', index=False)
+    
+
+    def _set_surface_proteins_raw_data(self, df):
+        self.__surface_proteins_raw_data = df

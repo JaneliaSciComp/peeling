@@ -21,10 +21,11 @@ class Processor(ABC):
     def _mass_data_clean(self, data):
         id_col = data.columns[0]
         data.rename(columns={id_col: 'From'}, inplace=True)
+        data.replace('', np.nan, inplace=True) #for web, missing value will be taken as '', won't be dropped
         data = data.dropna(axis=0, how='any')
         logger.info(f'After dropping rows with missing value: {len(data)}')
         data.columns = [re.sub('[^a-zA-Z0-9_]', '_', name) for name in data.columns]
-        data[data.columns[1:]] = data[data.columns[1:]].astype('float')
+        data.loc[:, data.columns[1:]] = data[data.columns[1:]].astype('float')
         return data
     
 
@@ -194,12 +195,21 @@ class Processor(ABC):
         col_name = 'include_sum'
         data[col_name] = data.iloc[:, -total_col:].sum(axis=1)
         
-        surface_proteins = pd.DataFrame(data[data[col_name] >= threshold].index).dropna(axis=0, how='any')
-        surface_proteins.drop_duplicates(keep='first', inplace=True)
-        ids = self._get_ids()
+        #surface_proteins = pd.DataFrame(data[data[col_name] >= threshold].index).dropna(axis=0, how='any')
+        surface_proteins = data[data[col_name] >= threshold].iloc[:, :total_col+4]
+        surface_proteins.reset_index(inplace=True)
+        surface_proteins.dropna(subset='Entry', axis=0, how='any')
+        surface_proteins.drop_duplicates(subset='Entry', keep='first', inplace=True)
+        #print(surface_proteins.columns)
+        #ids = self._get_ids()
         #print(ids.head())
-        surface_proteins = self.__merge_extra_data(surface_proteins, ids)
-        surface_proteins.drop_duplicates(keep='first', inplace=True)
+        #surface_proteins = self.__merge_extra_data(surface_proteins, ids)
+        #surface_proteins.drop_duplicates(subset=['Entry'], keep='first', inplace=True)
+        #print(surface_proteins.columns)
+        surface_proteins_raw_data =  surface_proteins.iloc[:, :total_col+1]
+        self._set_surface_proteins_raw_data(surface_proteins_raw_data)
+        surface_proteins = surface_proteins[['Entry', 'Gene Names', 'Protein names', 'Organism', 'Length']]
+        
         #print(len(surface_proteins))
         logger.info(f'{len(surface_proteins)} surface proteins found')
         surface_proteins.to_csv(f'{path}/post-cutoff-proteome.tsv', sep='\t', index=False)
@@ -209,15 +219,15 @@ class Processor(ABC):
             f.write(proteins_str)
     
 
-    def __merge_extra_data(self, surface_proteins, ids):
-        #print(len(surface_proteins), len(ids))
-        surface_proteins = surface_proteins.merge(ids, how='left', left_on='Entry', right_on='Entry')
-        #print(len(surface_proteins), len(ids))
-        surface_proteins.drop(['From'], axis=1, inplace=True)
-        surface_proteins = surface_proteins[['Entry', 'Gene Names', 'Protein names', 'Organism', 'Length']]
-        #print(surface_proteins.head())
-        #print(self._get_ids().head())
-        return surface_proteins
+    # def __merge_extra_data(self, surface_proteins, ids):
+    #     print(len(surface_proteins), len(ids))
+    #     surface_proteins = surface_proteins.merge(ids, how='left', left_on='Entry', right_on='Entry')
+    #     print(len(surface_proteins), len(ids))
+    #     surface_proteins.drop(['From'], axis=1, inplace=True)
+    #     #surface_proteins = surface_proteins[['Entry', 'Gene Names', 'Protein names', 'Organism', 'Length']]
+    #     #print(surface_proteins.head())
+    #     #print(self._get_ids().head())
+    #     return surface_proteins
         
 
     @abstractmethod
@@ -233,7 +243,6 @@ class Processor(ABC):
         except OSError as error: 
             logger.debug(error)
         
-        #data = self._mass_data_clean(data)
         fig_name = self.__make_heatmap(data, plots_path)
         self._plot_supplemental(fig_name)
         id_mapping_data = await self._get_id_mapping_data(data)
@@ -269,6 +278,8 @@ class Processor(ABC):
         return self.__uniprot_communicator
     
 
-    @abstractmethod
-    def _get_ids(self):
-        raise NotImplemented()
+    # @abstractmethod
+    # def _get_ids(self):
+    #     raise NotImplemented()
+    
+    

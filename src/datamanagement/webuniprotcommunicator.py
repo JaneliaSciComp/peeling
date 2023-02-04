@@ -123,6 +123,7 @@ class WebUniProtCommunicator(UniProtCommunicator):
                 logger.error(e)
                 raise
         
-
+    
+    # called in main.py, to export cached ids by api instead of waiting for update
     def get_ids(self):
         return self.__ids

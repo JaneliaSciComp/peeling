@@ -43,7 +43,8 @@ class CliProcessor(Processor):
             # if self._get_user_input_reader().get_save():
             #     self.__ids.to_csv(self.__path+'/latest_ids.tsv', sep='\t', index=False)
             #self.__ids = self.__ids[['From', 'Entry']]
-        return self.__ids[['From', 'Entry']]
+        #return self.__ids[['From', 'Entry']]
+        return self.__ids
 
         
     # implement abstract method
@@ -60,6 +61,7 @@ class CliProcessor(Processor):
                     id_mapping_data = await self._get_id_mapping_data(annotation)
                     annotation = self._merge_id(annotation, id_mapping_data)
                     annotation.reset_index(inplace=True)
+                    annotation = pd.DataFrame(annotation.iloc[:, 0])
                 annotation.columns = ['Entry']
             else: # retrieve annotation file from UniProt
                 annotation = await self._get_uniprot_communicator().get_annotation('surface')
@@ -76,6 +78,7 @@ class CliProcessor(Processor):
                     id_mapping_data = await self._get_id_mapping_data(annotation)
                     annotation = self._merge_id(annotation, id_mapping_data)
                     annotation.reset_index(inplace=True)
+                    annotation = pd.DataFrame(annotation.iloc[:, 0])
                 annotation.columns = ['Entry']
             else: # retrieve annotation file from UniProt
                 annotation = await self._get_uniprot_communicator().get_annotation('cyto')
@@ -136,5 +139,5 @@ class CliProcessor(Processor):
         return parent_path
     
 
-    def _get_ids(self):
-        return self.__ids
+    def _set_surface_proteins_raw_data(self, df):
+        return
