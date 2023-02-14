@@ -206,11 +206,11 @@ class Processor(ABC):
         #print(ids.head())
         #surface_proteins = self.__merge_extra_data(surface_proteins, ids)
         #surface_proteins.drop_duplicates(subset=['Entry'], keep='first', inplace=True)
-        #print(surface_proteins.columns)
-        surface_proteins_raw_data =  surface_proteins.iloc[:, :total_col+1]
+        ##print(surface_proteins.columns)
+        surface_proteins_raw_data =  surface_proteins
         self._set_surface_proteins_raw_data(surface_proteins_raw_data)
         surface_proteins = surface_proteins[['Entry', 'Gene Names', 'Protein names', 'Organism', 'Length']]
-        
+
         #print(len(surface_proteins))
         logger.info(f'{len(surface_proteins)} surface proteins found')
         surface_proteins.to_csv(f'{path}/post-cutoff-proteome.tsv', sep='\t', index=False)

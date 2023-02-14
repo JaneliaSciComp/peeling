@@ -133,7 +133,7 @@ class WebProcessor(Processor):
             plt.savefig(f'{results_plot_path}/{title}.{plot_format}', dpi=130)
             plt.savefig(f'{web_plot_path}/{title}.png', dpi=130)
             plt.close()
-            return f'{web_plot_path}/{title}.png'
+            #return f'{web_plot_path}/{title}.png'
         except Exception as e:
             logger.error(e)
             raise
