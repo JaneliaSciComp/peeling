@@ -92,13 +92,14 @@ class WebProcessor(Processor):
         data = await self._get_user_input_reader().get_mass_data()
         results_path = self._construct_path()
         data = self._mass_data_clean(data)
+        columns = list(data.columns[1:])
         await self._analyze(data, results_path)
         self.__surface_proteins_raw_data.to_csv(f'../results/{self.__uuid}/post-cutoff-proteome_with_raw_data.tsv', sep='\t', index=False)
         self._write_args(results_path)
         logger.info(f'Results saved at {self.__uuid}')
         shutil.make_archive(f'../results/{self.__uuid}/results', 'zip', root_dir=f'../results/{self.__uuid}/results')
         #shutil.rmtree(f'../results/{self.__uuid}/results')
-        return  self.__uuid, self.__failed_id_mapping
+        return  self.__uuid, self.__failed_id_mapping, columns
 
 
     def plot_scatter(self):
