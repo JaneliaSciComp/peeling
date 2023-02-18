@@ -159,7 +159,7 @@ class PantherProcessor(ABC):
 
     
     @abstractmethod
-    def __write_args(self):
+    def _write_args(self):
         raise NotImplemented()
     
     

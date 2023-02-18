@@ -33,7 +33,7 @@ class WebPantherProcessor(PantherProcessor):
 
 
     #implement abstract method
-    def __write_args(self): 
+    def _write_args(self): 
         with open(f'{self._get_path()}/log.txt', 'w') as f:
             f.write(f'Panther organism: {self._get_organism_id()}\n')
 
@@ -41,7 +41,7 @@ class WebPantherProcessor(PantherProcessor):
     # implement abstract method
     async def start(self):
         try:
-            self.__write_args()
+            self._write_args()
             self._create_client()
             results_dict = await self._run_enrichment()
             results_dict = self.__reformat_enrich(results_dict)

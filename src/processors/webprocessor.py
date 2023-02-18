@@ -61,7 +61,7 @@ class WebProcessor(Processor):
 
     # implement abstract method
     def _plot_supplemental(self, fig_name): #plt, 
-        plt.savefig(f'{self.__web_plots_path}/{fig_name}.png', dpi=130)
+        plt.savefig(f'{self.__web_plots_path}/{fig_name}.png', dpi=130, bbox_inches='tight')
         plt.close()
  
 
