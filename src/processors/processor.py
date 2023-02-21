@@ -37,7 +37,8 @@ class Processor(ABC):
         fig, ax = plt.subplots()
         ax = sns.heatmap(corr, linewidth=0.5, annot=True, cmap="coolwarm", vmin=-1, vmax=1, square=True) 
         ax.tick_params(left=False, bottom=False)
-        ax.tick_params(axis='x', rotation=50)
+        # ax.tick_params(axis='x', rotation=50)
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=50, ha='right')
         title = 'Pairwise Pearson Correlation Coefficient'
         plt.title(title)
         fig_name = title.replace(' ', '_')

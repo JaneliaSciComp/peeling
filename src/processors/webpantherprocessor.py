@@ -28,7 +28,8 @@ class WebPantherProcessor(PantherProcessor):
     def __reformat_enrich(self, results_dict):
         results_dict_reformat = {}
         for category, df in results_dict.items():
-            results_dict_reformat[category] = dict(zip(df['Term'], df['FDR']))
+            #results_dict_reformat[category] = dict(zip(df['Term'], df['FDR']))
+            results_dict_reformat[category] = df.values.tolist()
         return results_dict_reformat
 
 
