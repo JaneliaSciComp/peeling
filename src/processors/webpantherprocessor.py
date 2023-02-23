@@ -35,7 +35,7 @@ class WebPantherProcessor(PantherProcessor):
 
     #implement abstract method
     def _write_args(self): 
-        with open(f'{self._get_path()}/log.txt', 'w') as f:
+        with open(f'{self._get_path()}/log.txt', 'a') as f:
             f.write(f'Panther organism: {self._get_organism_id()}\n')
 
     

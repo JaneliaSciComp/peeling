@@ -13,7 +13,7 @@ API_RETRY = 3
 TIME_OUT = 20
 
 #corresponding to "PANTHER GO Slim Cellular Location", "PANTHER GO Slim Biological Process", "ANNOT_TYPE_REACTOME_PATHWAY"
-ENRICH_CATEGORIES = {'ANNOT_TYPE_ID_PANTHER_GO_SLIM_CC':'Panther_GO_Slim_Cellular_Componet', 'ANNOT_TYPE_ID_PANTHER_GO_SLIM_BP':'Panther_GO_Slim_Biological_Process', "ANNOT_TYPE_ID_REACTOME_PATHWAY":'Reactom_Pathway'}
+ENRICH_CATEGORIES = {'ANNOT_TYPE_ID_PANTHER_GO_SLIM_CC':'Panther_GO_Slim_Cellular_Component', 'ANNOT_TYPE_ID_PANTHER_GO_SLIM_BP':'Panther_GO_Slim_Biological_Process', "ANNOT_TYPE_ID_REACTOME_PATHWAY":'Reactom_Pathway'}
 
 
 class PantherProcessor(ABC):
@@ -144,7 +144,7 @@ class PantherProcessor(ABC):
             url = self.__make_url_enrich(annot_dataset)
             response = await self.__submit(url)
             results_df = self.__format_enrich(response)
-            results_df.to_csv(f'{self.__path}/post-cutoff-proteome_{ENRICH_CATEGORIES[annot_dataset]}.tsv', sep='\t', index=False)
+            results_df.to_csv(f'{self.__path}/post-cutoff-proteome_{self.__organism_id}_{ENRICH_CATEGORIES[annot_dataset]}.tsv', sep='\t', index=False)
             logger.info(f'{annot_dataset} is done. Time: {datetime.now()-start_time}')
             return (ENRICH_CATEGORIES[annot_dataset], results_df)
         except Exception as e:

@@ -167,7 +167,7 @@ class Processor(ABC):
         plt.ylabel('TPR')
         plt.text(0, 0.9, 'AUC = ' + str(round(auc(data.iloc[:, -3], data.iloc[:, -4]), 2)))
         plt.plot(cutoff_fpr, cutoff_tpr, marker='o', color='r')
-        ax.annotate('Cut-off Rank: '+str(cut_off_pos)+'\nAccession ID: '+cutoff_protein_id +'\nTPR='+str(round(cutoff_tpr,3))+', FPR='+str(round(cutoff_fpr,3)), (cutoff_fpr+0.05, cutoff_tpr-0.15))
+        ax.annotate('Cut-off Rank: '+str(cut_off_pos)+'\nUniprot ID: '+cutoff_protein_id +'\nTPR='+str(round(cutoff_tpr,3))+', FPR='+str(round(cutoff_fpr,3)), (cutoff_fpr+0.05, cutoff_tpr-0.15))
         fig_name = f'ROC_{data.columns[col_index]}'
         plt.savefig(f'{output_dir}/{fig_name}.{self.__user_input_reader.get_plot_format()}', dpi=130)
         return fig_name
@@ -197,22 +197,15 @@ class Processor(ABC):
         col_name = 'include_sum'
         data[col_name] = data.iloc[:, -total_col:].sum(axis=1)
         
-        #surface_proteins = pd.DataFrame(data[data[col_name] >= threshold].index).dropna(axis=0, how='any')
         surface_proteins = data[data[col_name] >= threshold].iloc[:, :total_col+4]
         surface_proteins.reset_index(inplace=True)
         surface_proteins.dropna(subset='Entry', axis=0, how='any')
         surface_proteins.drop_duplicates(subset='Entry', keep='first', inplace=True)
-        #print(surface_proteins.columns)
-        #ids = self._get_ids()
-        #print(ids.head())
-        #surface_proteins = self.__merge_extra_data(surface_proteins, ids)
-        #surface_proteins.drop_duplicates(subset=['Entry'], keep='first', inplace=True)
-        ##print(surface_proteins.columns)
         surface_proteins_raw_data =  surface_proteins
         self._set_surface_proteins_raw_data(surface_proteins_raw_data)
+        print(len(surface_proteins), surface_proteins.columns)
         surface_proteins = surface_proteins[['Entry', 'Gene Names', 'Protein names', 'Organism', 'Length']]
 
-        #print(len(surface_proteins))
         logger.info(f'{len(surface_proteins)} surface proteins found')
         surface_proteins.to_csv(f'{path}/post-cutoff-proteome.tsv', sep='\t', index=False)
         # save a txt file containing just surface protein ids separated by ',', so that easily copy to put in other web
@@ -220,17 +213,6 @@ class Processor(ABC):
         with open(f'{path}/post-cutoff-proteome.txt', 'w') as f:
             f.write(proteins_str)
     
-
-    # def __merge_extra_data(self, surface_proteins, ids):
-    #     print(len(surface_proteins), len(ids))
-    #     surface_proteins = surface_proteins.merge(ids, how='left', left_on='Entry', right_on='Entry')
-    #     print(len(surface_proteins), len(ids))
-    #     surface_proteins.drop(['From'], axis=1, inplace=True)
-    #     #surface_proteins = surface_proteins[['Entry', 'Gene Names', 'Protein names', 'Organism', 'Length']]
-    #     #print(surface_proteins.head())
-    #     #print(self._get_ids().head())
-    #     return surface_proteins
-        
 
     @abstractmethod
     def _construct_path(self):
@@ -278,10 +260,5 @@ class Processor(ABC):
     
     def _get_uniprot_communicator(self):
         return self.__uniprot_communicator
-    
-
-    # @abstractmethod
-    # def _get_ids(self):
-    #     raise NotImplemented()
     
     

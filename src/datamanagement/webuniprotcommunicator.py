@@ -23,7 +23,7 @@ class WebUniProtCommunicator(UniProtCommunicator):
     #     return results_df
 
 
-    # overriding abstract method
+    # implement abstract method
     async def get_latest_id(self, old_ids, meta):
         if self.__ids is None:
             to_retrieve = old_ids

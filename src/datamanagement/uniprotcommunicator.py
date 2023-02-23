@@ -211,7 +211,8 @@ class UniProtCommunicator(ABC):
             link = await self.__check_id_mapping_results_ready(job_id)
             results = await self.__get_id_mapping_results_search(link)
             results_df = self.__get_data_frame_from_tsv_results(results)
-            results_df.drop(['Entry Name', 'Reviewed'], axis=1, inplace=True)
+            if len(results_df)>0:
+                results_df.drop(['Entry Name', 'Reviewed'], axis=1, inplace=True)
             logger.info(f'retrieved: {len(results_df)}')
             # if not self.__save and len(results_df)>0:
             #     results_df = results_df[['From', 'Entry']]
