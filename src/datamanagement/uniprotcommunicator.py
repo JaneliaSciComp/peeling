@@ -198,8 +198,9 @@ class UniProtCommunicator(ABC):
         except Exception:
             raise
         finally:
-            await self.__client.aclose()
-            self.__client = None
+            if self.__client is not None:
+                await self.__client.aclose()
+                self.__client = None
 
 
     async def __retrieve_latest_id_chunk(self, chunk):
@@ -258,12 +259,6 @@ class UniProtCommunicator(ABC):
     
 
     async def _retrieve_annotation(self):
-        # for dev stage
-        # self.__annotation_surface = pd.read_table('../retrieved_data/annotation_surface.tsv', sep='\t')
-#         self.__annotation_cyto = pd.read_table('../retrieved_data/annotation_cyto.tsv', sep='\t')
-#         logger.debug(f'\n{self.__annotation_surface.head()}')
-#         return
-
         start_time = datetime.now()
 
         if self.__client is None:
@@ -276,8 +271,9 @@ class UniProtCommunicator(ABC):
         except Exception:
             raise
         finally:
-            await self.__client.aclose()
-            self.__client = None
+            if self.__client is not None:
+                await self.__client.aclose()
+                self.__client = None
       
 
     async def get_annotation(self, type):

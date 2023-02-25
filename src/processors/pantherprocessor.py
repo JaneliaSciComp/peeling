@@ -25,8 +25,9 @@ class PantherProcessor(ABC):
     
 
     def _create_client(self):
-        transport = httpx.AsyncHTTPTransport(retries=CONNECT_RETRY)
-        self.__client = httpx.AsyncClient(http2=True, timeout=TIME_OUT, transport=transport, event_hooks={'response': [self.__check_response]})
+        if self.__client is None:
+            transport = httpx.AsyncHTTPTransport(retries=CONNECT_RETRY)
+            self.__client = httpx.AsyncClient(http2=True, timeout=TIME_OUT, transport=transport, event_hooks={'response': [self.__check_response]})
 
         
     async def __check_response(self, response):
@@ -176,4 +177,7 @@ class PantherProcessor(ABC):
     
 
     async def _close_client(self):
-        await self.__client.aclose()
+        if self.__client is not None:
+            await self.__client.aclose()
+            self.__client = None
+        

@@ -4,6 +4,7 @@ import numpy as np
 from datetime import datetime
 import logging
 import asyncio
+import os
 
 logger = logging.getLogger('peeling')
 
@@ -69,35 +70,54 @@ class WebUniProtCommunicator(UniProtCommunicator):
         start_time = datetime.now()
         logger.info('Initializing ...')
         try:
-            annotation_surface = pd.read_table('../retrieved_data/annotation_surface.tsv', sep='\t', header=0)
-            logger.info(f'Read in {len(annotation_surface)} entries from archived annotation_surface file')
-            self._set_annotation(annotation_surface, 'surface')
-            annotation_cyto = pd.read_table('../retrieved_data/annotation_cyto.tsv', sep='\t', header=0)
-            logger.info(f'Read in {len(annotation_cyto)} entries from archived annotation_cyto file')
-            self._set_annotation(annotation_cyto, 'cyto')
-        except Exception as e:
-            logger.info(e)
-            await self._retrieve_annotation()
-            surface = await self.get_annotation('surface')
-            surface.to_csv('../retrieved_data/annotation_surface.tsv', sep='\t', index=False)
-            cyto = await self.get_annotation('cyto')
-            cyto.to_csv('../retrieved_data/annotation_cyto.tsv', sep='\t', index=False)
-            logger.info(f'Annotation files saved')
+            has_data = True
+            surface_path = '../retrieved_data/annotation_surface.tsv'
+            if os.path.exists(surface_path):
+                annotation_surface = pd.read_table(surface_path, sep='\t', header=0)
+                logger.info(f'Read in {len(annotation_surface)} entries from archived annotation_surface file')
+                self._set_annotation(annotation_surface, 'surface')
+            else:
+                has_data = False
+
+            cyto_path = '../retrieved_data/annotation_cyto.tsv'
+            if os.path.exists(cyto_path):
+                annotation_cyto = pd.read_table(cyto_path, sep='\t', header=0)
+                logger.info(f'Read in {len(annotation_cyto)} entries from archived annotation_cyto file')
+                self._set_annotation(annotation_cyto, 'cyto')
+            else:
+                has_data = False
+            
+            if not has_data:
+                await self._retrieve_annotation()
+                surface = await self.get_annotation('surface')
+                surface.to_csv('../retrieved_data/annotation_surface.tsv', sep='\t', index=False)
+                cyto = await self.get_annotation('cyto')
+                cyto.to_csv('../retrieved_data/annotation_cyto.tsv', sep='\t', index=False)
+                logger.info(f'Annotation files saved')
         
-        try:
-            self.__ids = pd.read_table('../retrieved_data/latest_ids.tsv', sep='\t', header=0)
-            logger.info(f'Read in {len(self.__ids)} entries from archived latest_ids file')
+            id_path = '../retrieved_data/latest_ids.tsv'
+            if os.path.exists(id_path):
+                self.__ids = pd.read_table(id_path, sep='\t', header=0)
+                logger.info(f'Read in {len(self.__ids)} entries from archived latest_ids file')
+        
+            end_time = datetime.now()
+            logger.info(f'Initialization is done. Time: {end_time-start_time}')
+        
         except Exception as e:
+            logger.error('Initialization failed')
             logger.info(e)
-        end_time = datetime.now()
-        logger.info(f'Initialization is done. Time: {end_time-start_time}')
+            raise
+        
 
 
     async def update_data(self):
         start_time = datetime.now()
         if self.__track_update == 0:
-            await self.__initialize()
-            self.__track_update += 1
+            try:
+                await self.__initialize()
+                self.__track_update += 1
+            except Exception as e:
+                logger.error(e)
         else:
             logger.info('Updating data...')
             try:
@@ -121,7 +141,6 @@ class WebUniProtCommunicator(UniProtCommunicator):
                 self.__track_update += 1
             except Exception as e:
                 logger.error(e)
-                raise
         
     
     # called in main.py, to export cached ids by api instead of waiting for update

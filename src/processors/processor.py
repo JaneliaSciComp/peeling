@@ -203,7 +203,6 @@ class Processor(ABC):
         surface_proteins.drop_duplicates(subset='Entry', keep='first', inplace=True)
         surface_proteins_raw_data =  surface_proteins
         self._set_surface_proteins_raw_data(surface_proteins_raw_data)
-        print(len(surface_proteins), surface_proteins.columns)
         surface_proteins = surface_proteins[['Entry', 'Gene Names', 'Protein names', 'Organism', 'Length']]
 
         logger.info(f'{len(surface_proteins)} surface proteins found')

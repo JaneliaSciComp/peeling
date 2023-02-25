@@ -12,6 +12,8 @@ class WebPantherProcessor(PantherProcessor):
             path = '../results/' + unique_id + '/results'
             super().__init__(path)
             self._set_organism_id(organism_id)
+        else:
+            super().__init__(None)
 
 
     async def retrieve_organisms(self):

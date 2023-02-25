@@ -38,7 +38,7 @@ class CliPantherProcessor(PantherProcessor):
         except Exception:
             raise
         finally:
-            await self._close_client()  
+            await self._close_client()
 
 
     # implement abstract method
