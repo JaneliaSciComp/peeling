@@ -56,4 +56,4 @@ python3 main.py mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replic
 
 -n, --nomap    No id mapping for local annotation files, true if specified
 
--p, --panther    The organism from which the mass spec data is made, a required input for Panther enrichment analysis. Supported organisms depend on Panther, use -h/--help to see supported organisms
+-p, --panther    The organism from which the mass spec data is made, a required input for Panther enrichment analysis. Please refer to Panther's API page http://pantherdb.org/services/oai/pantherdb/supportedgenomes for supported organism. Choose the corresponding 'long_names', and wrap it by quotes, e.g. 'Homo sapiens'
