@@ -22,7 +22,7 @@ class CliUserInputReader(UserInputReader):
         try:
             df = pd.read_table(filename, sep='\t', header=0)
         except UnicodeDecodeError as e1:
-            logger.error('Stopped!', e1) 
+            logger.error(e1) 
             logger.error('Check the input file is tab delimited (.tsv)')
             raise
         except FileNotFoundError as e2:
@@ -65,7 +65,7 @@ class CliUserInputReader(UserInputReader):
             logger.info('Read in %d rows from latest_ids file' % (len(df)))
             return df
         except AssertionError as e:
-            logger.error('Stopped!', e)
+            logger.error(e)
             raise
         
 
@@ -76,7 +76,7 @@ class CliUserInputReader(UserInputReader):
             logger.info('Read in %d rows from annotation_surface file' % (len(df)))
             return df
         except AssertionError as e:
-            logger.error('Stopped!', e)
+            logger.error(e)
             raise
        
 
@@ -87,7 +87,7 @@ class CliUserInputReader(UserInputReader):
             logger.info('Read in %d rows from annotation_cyto file' % (len(df)))
             return df
         except AssertionError as e:
-            logger.error('Stopped!', e)
+            logger.error(e)
             raise
 
     

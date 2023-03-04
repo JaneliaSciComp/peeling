@@ -133,7 +133,7 @@ class CliProcessor(Processor):
         parent_path = self._construct_path()
         data = self._mass_data_clean(data)
         asyncio.run(self._analyze(data, parent_path))
-        if self._get_user_input_reader().get_save():
+        if self._get_user_input_reader().get_save() and self._get_user_input_reader().get_latest_ids_filename() is None:
             self.__ids.to_csv(self.__path+'/latest_ids.tsv', sep='\t', index=False)
         self._write_args(parent_path)
         return parent_path

@@ -19,14 +19,19 @@ class Processor(ABC):
         
     
     def _mass_data_clean(self, data):
-        id_col = data.columns[0]
-        data.rename(columns={id_col: 'From'}, inplace=True)
-        data.replace('', np.nan, inplace=True) #for web, missing value will be taken as '', won't be dropped
-        data = data.dropna(axis=0, how='any')
-        logger.info(f'After dropping rows with missing value: {len(data)}')
-        data.columns = [re.sub('[^a-zA-Z0-9_]', '_', name) for name in data.columns]
-        data[data.columns[1:]] = data[data.columns[1:]].astype('float')
-        return data
+        try:
+            id_col = data.columns[0]
+            data.rename(columns={id_col: 'From'}, inplace=True)
+            data.replace('', np.nan, inplace=True) #for web, missing value will be taken as '', won't be dropped
+            data = data.dropna(axis=0, how='any')
+            logger.info(f'After dropping rows with missing value: {len(data)}')
+            assert(len(data) >= 1), 'Empty data after dropping missing values'
+        
+            data.columns = [re.sub('[^a-zA-Z0-9_]', '_', name) for name in data.columns]
+            data[data.columns[1:]] = data[data.columns[1:]].astype('float')
+            return data
+        except Exception as e:
+            raise
     
 
     def __make_heatmap(self, data, plot_path):

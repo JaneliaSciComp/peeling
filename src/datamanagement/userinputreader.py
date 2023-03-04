@@ -21,7 +21,7 @@ class UserInputReader(ABC):
             assert(self.__tolerance >= 0 and self.__tolerance <= self.__num_controls*self.__num_replicates), 'Tolerance should be an integer in [0, #controls * #replicates)'
             assert(self.__plot_format in set(plt.gcf().canvas.get_supported_filetypes().keys())), 'The plot format is invalid'
         except AssertionError as e:
-            logger.error('Stopped!', e)
+            logger.error(e)
             raise
     
     
@@ -29,15 +29,15 @@ class UserInputReader(ABC):
         try:
             assert(len(df) >= 1), 'The file is empty'
         except AssertionError as e:
-            logger.error('Stopped!', e)
+            logger.error(e)
             raise
     
 
     def _check_mass_spec_file(self, df):
         try:
-            assert(df.shape[1] == self.__num_controls * self.__num_replicates + 1), 'The number of columns does not match the input numbers'
+            assert(df.shape[1] == self.__num_controls * self.__num_replicates + 1), 'The number of columns does not equal #replicates * #controls '
         except AssertionError as e:
-            logger.error('Stopped!', e)
+            logger.error(e)
             logger.error('Check the input file is tab delimited (.tsv) and has correct data')
             raise
     
