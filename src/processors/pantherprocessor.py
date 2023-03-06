@@ -57,12 +57,15 @@ class PantherProcessor(ABC):
     async def __submit(self, url):
         retry = 0
         while retry < API_RETRY:
-            retry += 1
+            if retry > 1:
+                logger.info('Retry')
             try:
                 response = await self.__client.get(url)
                 return response
             except Exception as e:
+                logger.error('Something wrong with Panther')
                 logger.error(e)
+            retry += 1
         raise Exception('Reached maximal Panther API trail')
     
 
