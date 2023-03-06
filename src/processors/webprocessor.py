@@ -61,7 +61,7 @@ class WebProcessor(Processor):
 
     # implement abstract method
     def _plot_supplemental(self, fig_name): #plt, 
-        plt.savefig(f'{self.__web_plots_path}/{fig_name}.png', dpi=130, bbox_inches='tight')
+        plt.savefig(f'{self.__web_plots_path}/{fig_name}.jpeg', dpi=130, bbox_inches='tight')
         plt.close()
  
 
@@ -120,7 +120,7 @@ class WebProcessor(Processor):
             # print(lower_bound, upper_bound)
 
             fig, ax = plt.subplots()
-            ax.scatter(data[self.__x], data[self.__y], linewidths=0.5, edgecolors='white')
+            ax.scatter(data[self.__x], data[self.__y], linewidths=0.5, edgecolors='white') #
             # ax.set_xlim(lower_bound, upper_bound)
             # ax.set_ylim(lower_bound, upper_bound)
             ax.set_aspect('equal')
@@ -132,7 +132,7 @@ class WebProcessor(Processor):
             plt.title(title)
             title = title.replace(" ", "_")
             plt.savefig(f'{results_plot_path}/{title}.{plot_format}', dpi=130)
-            plt.savefig(f'{web_plot_path}/{title}.png', dpi=130)
+            plt.savefig(f'{web_plot_path}/{title}.jpeg', dpi=130)
             plt.close()
             #return f'{web_plot_path}/{title}.png'
         except Exception as e:
