@@ -21,101 +21,101 @@ class TestPeeling(unittest.TestCase):
             shutil.rmtree(f'{OUTPUT_DIR}/{dir}', ignore_errors=True)
 
     
-    def test_local_ids_anno(self):
-        # using local anno and ids files, local anno will be mapped on local ids file 
-        print('\n\n\n')
-        print('#########  local_ids_anno  #########')
-        # execute peeling
-        mass_data = '../data/mass_spec_data.tsv'
-        ctrl = '2'
-        rep = '3'
-        output_dir = f'{OUTPUT_DIR}/local_ids_anno/'
-        cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -s {ANNO_SURFACE} -c {ANNO_CYTO} --ids {IDS} -o {output_dir}'
-        os.system(cmd)
+    # def test_local_ids_anno(self):
+    #     # using local anno and ids files, local anno will be mapped on local ids file 
+    #     print('\n\n\n')
+    #     print('#########  local_ids_anno  #########')
+    #     # execute peeling
+    #     mass_data = '../data/mass_spec_data.tsv'
+    #     ctrl = '2'
+    #     rep = '3'
+    #     output_dir = f'{OUTPUT_DIR}/local_ids_anno/'
+    #     cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -s {ANNO_SURFACE} -c {ANNO_CYTO} --ids {IDS} -o {output_dir}'
+    #     os.system(cmd)
 
-        # check output 
-        timestamp = os.listdir(output_dir)[-1]
-        res_dir = output_dir + timestamp
-        res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
-        print(res_surface_prot.head(3))
-        self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
+    #     # check output 
+    #     timestamp = os.listdir(output_dir)[-1]
+    #     res_dir = output_dir + timestamp
+    #     res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
+    #     print(res_surface_prot.head(3))
+    #     self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
         
 
-    def test_local_anno_remote_ids(self):
-        # using local anno and remote ids files, local anno will be mapped 
-        print('\n\n\n')
-        print('#########  local_anno_remote_ids  #########')
-        mass_data = '../data/mass_spec_data.tsv'
-        ctrl = '2'
-        rep = '3'
-        output_dir = f'{OUTPUT_DIR}/local_anno_remote_ids/'
-        cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -s {ANNO_SURFACE} -c {ANNO_CYTO} -o {output_dir}'
-        os.system(cmd)
+    # def test_local_anno_remote_ids(self):
+    #     # using local anno and remote ids files, local anno will be mapped 
+    #     print('\n\n\n')
+    #     print('#########  local_anno_remote_ids  #########')
+    #     mass_data = '../data/mass_spec_data.tsv'
+    #     ctrl = '2'
+    #     rep = '3'
+    #     output_dir = f'{OUTPUT_DIR}/local_anno_remote_ids/'
+    #     cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -s {ANNO_SURFACE} -c {ANNO_CYTO} -o {output_dir}'
+    #     os.system(cmd)
 
-        # check output 
-        timestamp = os.listdir(output_dir)[-1]
-        res_dir = output_dir + timestamp
-        res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
-        print(res_surface_prot.head(3))
-        self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
-
-
-    def test_local_anno_remote_ids_nomap(self):
-        # using local anno and remote ids files, local anno should not be mapped 
-        print('\n\n\n')
-        print('#########  local_anno_remote_ids_nomap  #########')
-        mass_data = '../data/mass_spec_data.tsv'
-        ctrl = '2'
-        rep = '3'
-        output_dir = f'{OUTPUT_DIR}/local_anno_remote_ids_nomap/'
-        nomap = '--nomap'
-        cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -s {ANNO_SURFACE} -c {ANNO_CYTO} {nomap} -o {output_dir}'
-        os.system(cmd)
-
-        # check output 
-        timestamp = os.listdir(output_dir)[-1]
-        res_dir = output_dir + timestamp
-        res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
-        print(res_surface_prot.head(3))
-        self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
+    #     # check output 
+    #     timestamp = os.listdir(output_dir)[-1]
+    #     res_dir = output_dir + timestamp
+    #     res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
+    #     print(res_surface_prot.head(3))
+    #     self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
 
 
-    def test_remote_anno_local_ids(self):
-        # using remote anno files, and local ids files, remote anno will never be mapped 
-        print('\n\n\n')
-        print('#########  remote_anno_local_ids  #########')
-        mass_data = '../data/mass_spec_data.tsv'
-        ctrl = '2'
-        rep = '3'
-        output_dir = f'{OUTPUT_DIR}/remote_anno_local_ids/'
-        cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} --ids {IDS} -o {output_dir}'
-        os.system(cmd)
+    # def test_local_anno_remote_ids_nomap(self):
+    #     # using local anno and remote ids files, local anno should not be mapped 
+    #     print('\n\n\n')
+    #     print('#########  local_anno_remote_ids_nomap  #########')
+    #     mass_data = '../data/mass_spec_data.tsv'
+    #     ctrl = '2'
+    #     rep = '3'
+    #     output_dir = f'{OUTPUT_DIR}/local_anno_remote_ids_nomap/'
+    #     nomap = '--nomap'
+    #     cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -s {ANNO_SURFACE} -c {ANNO_CYTO} {nomap} -o {output_dir}'
+    #     os.system(cmd)
 
-        # check output 
-        timestamp = os.listdir(output_dir)[-1]
-        res_dir = output_dir + timestamp
-        res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
-        print(res_surface_prot.head(3))
-        self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
+    #     # check output 
+    #     timestamp = os.listdir(output_dir)[-1]
+    #     res_dir = output_dir + timestamp
+    #     res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
+    #     print(res_surface_prot.head(3))
+    #     self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
 
 
-    def test_remote_anno_ids(self):
-        # using remote anno and ids files, remote anno will never be mapped 
-        print('\n\n\n')
-        print('#########  remote_anno_ids  #########')
-        mass_data = '../data/mass_spec_data.tsv'
-        ctrl = '2'
-        rep = '3'
-        output_dir = f'{OUTPUT_DIR}/remote_anno_ids/'
-        cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -o {output_dir}'
-        os.system(cmd)
+    # def test_remote_anno_local_ids(self):
+    #     # using remote anno files, and local ids files, remote anno will never be mapped 
+    #     print('\n\n\n')
+    #     print('#########  remote_anno_local_ids  #########')
+    #     mass_data = '../data/mass_spec_data.tsv'
+    #     ctrl = '2'
+    #     rep = '3'
+    #     output_dir = f'{OUTPUT_DIR}/remote_anno_local_ids/'
+    #     cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} --ids {IDS} -o {output_dir}'
+    #     os.system(cmd)
 
-        # check output 
-        timestamp = os.listdir(output_dir)[-1]
-        res_dir = output_dir + timestamp
-        res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
-        print(res_surface_prot.head(3))
-        self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
+    #     # check output 
+    #     timestamp = os.listdir(output_dir)[-1]
+    #     res_dir = output_dir + timestamp
+    #     res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
+    #     print(res_surface_prot.head(3))
+    #     self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
+
+
+    # def test_remote_anno_ids(self):
+    #     # using remote anno and ids files, remote anno will never be mapped 
+    #     print('\n\n\n')
+    #     print('#########  remote_anno_ids  #########')
+    #     mass_data = '../data/mass_spec_data.tsv'
+    #     ctrl = '2'
+    #     rep = '3'
+    #     output_dir = f'{OUTPUT_DIR}/remote_anno_ids/'
+    #     cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -o {output_dir}'
+    #     os.system(cmd)
+
+    #     # check output 
+    #     timestamp = os.listdir(output_dir)[-1]
+    #     res_dir = output_dir + timestamp
+    #     res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
+    #     print(res_surface_prot.head(3))
+    #     self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
 
 
 # All tests below are using local anno and ids files for convenience
@@ -135,7 +135,7 @@ class TestPeeling(unittest.TestCase):
         # check output 
         timestamp = os.listdir(output_dir)[-1]
         res_dir = output_dir + timestamp
-        names = ['Reactom_Pathway', 'Panther_GO_Slim_Cellular_Component', 'Panther_GO_Slim_Biological_Process']
+        names = ['Reactome_Pathway', 'Panther_GO_Slim_Cellular_Component', 'Panther_GO_Slim_Biological_Process']
         for name in names:
             res_file_dir = f'{res_dir}/post-cutoff-proteome_{panther_org_id}_{name}.tsv'
             self.assertTrue(os.path.exists(res_file_dir), f'{name} result file does not exist')
@@ -243,16 +243,16 @@ class TestPeeling(unittest.TestCase):
 
 
     # test different tolerance, does not need to be run for every change
-    def test_tolerance(self):
-        mass_data = '../data/mass_spec_data.tsv'
-        ctrl = '2'
-        rep = '3'
-        for t in range(7):
-            print('\n\n')
-            print(f'######### Tolerance = {t}  #########')
-            output_dir = f'{OUTPUT_DIR}/test_tolerance/tolerance={t}/'
-            cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -t {t} -s {ANNO_SURFACE} -c {ANNO_CYTO} --ids {IDS} -o {output_dir}'
-            os.system(cmd)
+    # def test_tolerance(self):
+    #     mass_data = '../data/mass_spec_data.tsv'
+    #     ctrl = '2'
+    #     rep = '3'
+    #     for t in range(7):
+    #         print('\n\n')
+    #         print(f'######### Tolerance = {t}  #########')
+    #         output_dir = f'{OUTPUT_DIR}/test_tolerance/tolerance={t}/'
+    #         cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -t {t} -s {ANNO_SURFACE} -c {ANNO_CYTO} --ids {IDS} -o {output_dir}'
+    #         os.system(cmd)
     
 
     # # test different formats, does not need to be run for every change

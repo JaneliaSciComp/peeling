@@ -13,7 +13,7 @@ API_RETRY = 3
 TIME_OUT = 20
 
 #corresponding to "PANTHER GO Slim Cellular Location", "PANTHER GO Slim Biological Process", "ANNOT_TYPE_REACTOME_PATHWAY"
-ENRICH_CATEGORIES = {'ANNOT_TYPE_ID_PANTHER_GO_SLIM_CC':'Panther_GO_Slim_Cellular_Component', 'ANNOT_TYPE_ID_PANTHER_GO_SLIM_BP':'Panther_GO_Slim_Biological_Process', "ANNOT_TYPE_ID_REACTOME_PATHWAY":'Reactom_Pathway'}
+ENRICH_CATEGORIES = {'ANNOT_TYPE_ID_PANTHER_GO_SLIM_CC':'Panther_GO_Slim_Cellular_Component', 'ANNOT_TYPE_ID_PANTHER_GO_SLIM_BP':'Panther_GO_Slim_Biological_Process', "ANNOT_TYPE_ID_REACTOME_PATHWAY":'Reactome_Pathway'}
 
 
 class PantherProcessor(ABC):
