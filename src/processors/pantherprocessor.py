@@ -50,7 +50,6 @@ class PantherProcessor(ABC):
         query['correction'] = 'FDR'
         parsed = parsed._replace(query=urlencode(query, doseq=True))
         url = parsed.geturl()
-        #print(url[:100])
         return url
     
 
@@ -77,11 +76,8 @@ class PantherProcessor(ABC):
                 raise Exception(results_json['search']['error'])
             results = results_json['results']['result']
             df = pd.json_normalize(results)
-            logger.debug(df.head())
             
-            logger.debug(len(df))
             df = df[df['plus_minus'] == '+']
-            logger.debug(len(df))
             df = df.sort_values(by=['fdr'])
             
             df.rename(columns={'term.label': 'Term', 'fdr':'FDR'}, inplace=True)
@@ -97,7 +93,6 @@ class PantherProcessor(ABC):
         try:
             with open(f'{self.__path}/post-cutoff-proteome.txt', 'r') as f:
                 proteins = f.readline()
-            #print(proteins[:20])
             return proteins
         except Exception as e:
             logger.error(e)
@@ -106,7 +101,7 @@ class PantherProcessor(ABC):
 
     async def _retrieve_organisms(self):
         start_time = datetime.now()
-        logger.debug('Communicating with Panther for supported organisms ...')
+        #logger.debug('Communicating with Panther for supported organisms ...')
         try:
             url = 'http://pantherdb.org/services/oai/pantherdb/supportedgenomes'
             response = await self.__submit(url)

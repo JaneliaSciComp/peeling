@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from datamanagement.userinputreader import UserInputReader
 import logging
 

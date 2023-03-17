@@ -2,8 +2,6 @@ import re
 from datetime import datetime
 import zlib
 from urllib.parse import urlparse, parse_qs, urlencode
-# import requests
-# from requests.adapters import HTTPAdapter, Retry
 import httpx
 import asyncio
 import csv
@@ -59,7 +57,6 @@ class UniProtCommunicator(ABC):
             f"{API_URL}/idmapping/run",
             data={"from": 'UniProtKB_AC-ID', "to": 'UniProtKB', "ids": ",".join(ids)},
         )
-        # print(response.json())
         return response.json()["jobId"]
 
 
@@ -75,31 +72,27 @@ class UniProtCommunicator(ABC):
         trial = 0
         while trial < MAX_CHECK_RETRY:
             trial += 1
-            # print('here')
             response = await self.__client.get(f"{API_URL}/idmapping/status/{job_id}")
-            # print(type(response))
             if response.status_code == 303: 
                 return response.headers.get('location')
-                # print(response.headers.get('location'))
-                # response = await self.__client.get(response.headers.get('location'))
             j = response.json() 
             if "jobStatus" in j:
                 if j["jobStatus"] == "RUNNING":
-                    logger.info(f"{job_id}: Retrying in {POLLING_INTERVAL}s")
+                    logger.debug(f"{job_id}: Retrying in {POLLING_INTERVAL}s")
                     await asyncio.sleep(POLLING_INTERVAL)
                 else:
                     raise Exception(j["jobStatus"])
             else:
-                return bool(j["results"] or j["failedIds"]) #bool()return false if aug is 0,empty,None,false, otherwise true
+                return bool(j["results"] or j["failedIds"]) 
         raise Exception('Reach max trials for check job status')
 
 
     async def __get_batch(self, batch_response, compressed):
-        batch_url = self.__get_next_link(batch_response.headers) # this step is repeated until there is no batch_url
+        batch_url = self.__get_next_link(batch_response.headers) 
         while batch_url:
             batch_response = await self.__client.get(batch_url)
-            yield self.__decode_results(batch_response, compressed) #yield is similar to return, but next time the func is called, it will start from here, usually this func will be called in a loop
-            batch_url = self.__get_next_link(batch_response.headers) # repeats
+            yield self.__decode_results(batch_response, compressed) 
+            batch_url = self.__get_next_link(batch_response.headers) 
 
 
     def __combine_batches(self, all_results, batch_results):
@@ -129,8 +122,6 @@ class UniProtCommunicator(ABC):
         query["size"] = size
         compressed = True
         query['compressed'] = compressed
-        # if not self.__save:
-        #     query['fields'] = 'accession'
         parsed = parsed._replace(query=urlencode(query, doseq=True))
         url = parsed.geturl()
         response = await self.__client.get(url)
@@ -160,7 +151,7 @@ class UniProtCommunicator(ABC):
             self.__create_client()
 
         try:
-        # divide old_ids into chunks
+            # divide old_ids into chunks
             num_chunks = len(old_ids) // CHUNK_SIZE
             residual = len(old_ids) % CHUNK_SIZE
             num_chunks += 1 if residual>0 else 0
@@ -174,9 +165,7 @@ class UniProtCommunicator(ABC):
             no_mapping_ids_set = set()
             retrieved_ids = 0
             results_list_filtered = []
-            logger.debug('results_list', len(results_list))
             for i, item in enumerate(results_list): #item may be list df or integer (len(chunk)) if mapping failed
-                logger.debug('i ', i)
                 if isinstance(item, int):
                     failed_ids += item
                 else:
@@ -187,7 +176,6 @@ class UniProtCommunicator(ABC):
                             no_mapping_ids_set = no_mapping_ids_set.union(set(chunks[i]).difference(set(item.iloc[:, 0])))
                         else: #all ids in this chunk didn't find mapping data
                             no_mapping_ids_set = no_mapping_ids_set.union(set(chunks[i]))
-                        logger.debug(no_mapping_ids_set)
 
             meta['failed_id_mapping'] = failed_ids
             meta['no_id_mapping'] = no_mapping_ids_set
@@ -214,14 +202,12 @@ class UniProtCommunicator(ABC):
             results_df = self.__get_data_frame_from_tsv_results(results)
             if len(results_df)>0:
                 results_df.drop(['Entry Name', 'Reviewed'], axis=1, inplace=True)
-            logger.info(f'retrieved: {len(results_df)}')
+            logger.debug(f'retrieved: {len(results_df)}')
             # if not self.__save and len(results_df)>0:
             #     results_df = results_df[['From', 'Entry']]
             return results_df
         except Exception as e:
             logger.error(e)
-            # logger.error('Retry _retrieve_latest_id()')
-            # self._retrieve_latest_id()
             return len(chunk)
 
 
@@ -232,7 +218,7 @@ class UniProtCommunicator(ABC):
     
     async def __retrieve_annotation_surface(self):
         try:
-            logger.info('Retrieving annotation_surface file from UniProt...') #To do
+            logger.info('Retrieving annotation_surface file from UniProt...') 
             url = SURFACE_URL_CACHE if self.__save else SURFACE_URL
             results = await self.__get_annotation_results_search(url)
             results = self.__get_data_frame_from_tsv_results(results)
@@ -246,7 +232,7 @@ class UniProtCommunicator(ABC):
 
     async def __retrieve_annotation_cyto(self):
         try:
-            logger.info('Retrieving annotation_cyto file from UniProt...') #To do
+            logger.info('Retrieving annotation_cyto file from UniProt...')
             url = CYTO_URL_CACHE if self.__save else CYTO_URL
             results = await self.__get_annotation_results_search(url)
             results = self.__get_data_frame_from_tsv_results(results)

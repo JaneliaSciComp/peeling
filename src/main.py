@@ -29,7 +29,7 @@ def main():
     parser.add_argument("-n", "--nomap", action="store_true", help="no id mapping for local annotation files, true if specified")
     parser.add_argument("-a", "--cache", action="store_true", help="save the data retrieved from UniProt, true if specified")
     parser.add_argument("-f", "--format", choices=list(plt.gcf().canvas.get_supported_filetypes().keys()), help="the output format of plots, default is png")
-    parser.add_argument("-p", "--panther", help="the organism from which the mass spec data is made, a required input for Panther enrichment analysis. Please refer to Panther's API page http://pantherdb.org/services/oai/pantherdb/supportedgenomes for supported organism. Choose the corresponding 'long_names', and wrap it by quotes, e.g. 'Homo sapiens'") #TODO
+    parser.add_argument("-p", "--panther", help="the organism from which the mass spec data is made, a required input for Panther enrichment analysis. Please refer to Panther's API page http://pantherdb.org/services/oai/pantherdb/supportedgenomes for supported organism. Choose the corresponding 'long_names', and wrap it by quotes, e.g. 'Homo sapiens'")
 
     args = parser.parse_args()
 

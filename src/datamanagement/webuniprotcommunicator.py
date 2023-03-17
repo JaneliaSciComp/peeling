@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import logging
-import asyncio
 import os
 
 logger = logging.getLogger('peeling')
@@ -14,14 +13,6 @@ class WebUniProtCommunicator(UniProtCommunicator):
         super().__init__(cache)
         self.__ids = None
         self.__track_update = 0
-
-
-    # overriding super class method
-    # async def _retrieve_latest_id(self, old_ids, meta):
-    #     results_df = await super()._retrieve_latest_id(old_ids, meta)
-    #     if len(results_df)>0:
-    #             results_df = results_df[['From', 'Entry']]
-    #     return results_df
 
 
     # implement abstract method
@@ -39,9 +30,8 @@ class WebUniProtCommunicator(UniProtCommunicator):
         logger.info(f'to retrieve: {len(to_retrieve)}')
         if len(to_retrieve) > 0:
             retrieved_data = await self._retrieve_latest_id(list(to_retrieve), meta)
-            # add ids that didn't find mapping data to cached ids, all fields are NaN
             retrieved_data = self.__add_no_mapping_ids(retrieved_data, meta)
-            logger.debug(f'\n{retrieved_data.head()}')
+            # logger.debug(f'\n{retrieved_data.head()}')
 
             self.__ids = pd.concat([self.__ids, retrieved_data])
             logger.info(f'after retrieve, cached ids: {len(self.__ids)}')
@@ -56,14 +46,8 @@ class WebUniProtCommunicator(UniProtCommunicator):
             for col in retrieved_data.columns[1:]:
                 no_mapping_ids[col] = np.NaN
             retrieved_data = pd.concat([retrieved_data, no_mapping_ids])
-            logger.debug(f'\n{no_mapping_ids.head()}')
+            # logger.debug(f'\n{no_mapping_ids.head()}')
         return retrieved_data
-
-
-    # overriding super class method
-    # async def _retrieve_annotation(self):
-    #     await super()._retrieve_annotation()
-    #     super()._shorten_annotation()
  
 
     async def __initialize(self):

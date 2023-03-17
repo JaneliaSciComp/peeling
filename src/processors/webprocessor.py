@@ -1,7 +1,6 @@
-#from multiprocessing import parent_process
 from processors.processor import Processor
 import os
-import shutil
+#import shutil
 import uuid
 import logging
 import matplotlib.pyplot as plt
@@ -22,7 +21,6 @@ class WebProcessor(Processor):
             self.__surface_proteins_raw_data = None
         elif len(args) == 3:
             unique_id, x, y = args
-            #print(unique_id,x,y)
             self.__uuid = unique_id
             self.__x = x
             self.__y = y
@@ -31,10 +29,9 @@ class WebProcessor(Processor):
 
 
     #override superclass method
-    def _mass_data_clean(self, data): #TODO: test
+    def _mass_data_clean(self, data):
         data = super()._mass_data_clean(data)
         data.to_csv(f'../results/{self.__uuid}/mass_spec_data.tsv', sep='\t', index=False) 
-        #print('subclass _mass_data_clean called')
         return data
 
 
@@ -54,8 +51,7 @@ class WebProcessor(Processor):
         type: 'surface' or 'cyto'
         '''
         annotation = await self._get_uniprot_communicator().get_annotation(type) 
-        #annotation.columns = ['From']
-        logger.debug(f'\n{annotation.head()}')
+        # logger.debug(f'\n{annotation.head()}')
         return annotation.copy()
     
 
@@ -114,7 +110,6 @@ class WebProcessor(Processor):
             data = pd.read_table(data_path, sep='\t', header=0)
 
             corr = data[self.__x].corr(data[self.__y])
-            logger.debug(corr)
             # lower_bound = min(data[self.__x].min(), data[self.__y].min())-0.5
             # upper_bound = max(data[self.__x].max(), data[self.__y].max())+0.5
             # print(lower_bound, upper_bound)
@@ -134,7 +129,6 @@ class WebProcessor(Processor):
             plt.savefig(f'{results_plot_path}/{title}.{plot_format}', dpi=130)
             plt.savefig(f'{web_plot_path}/{title}.jpeg', dpi=130)
             plt.close()
-            #return f'{web_plot_path}/{title}.png'
         except Exception as e:
             logger.error(e)
             raise
@@ -151,22 +145,6 @@ class WebProcessor(Processor):
             logger.error(e)
             raise
 
-
-    # def _get_ids(self):
-    #     return self._get_uniprot_communicator().get_ids()
-    
-
-    # def __save_results_with_raw_data(self, data):
-    #     parent_path = f'../results/{self.__uuid}'
-    #     results_path = f'{parent_path}/results/post-cutoff-proteome.tsv'
-    #     results = pd.read_table(results_path, sep='\t', header=0)
-    #     data.drop_duplicates(subset=['From'], keep='first', inplace=True)
-    #     print(len(results), len(data))
-    #     results_with_data = results.merge(data, how='left', left_on='Entry', right_on='From')
-    #     print(len(results_with_data), len(data))
-    #     print(results_with_data.head())
-    #     results_with_data.to_csv(f'{parent_path}/post-cutoff-proteome_with_raw_data.tsv', sep='\t', index=False)
-    
 
     def _set_surface_proteins_raw_data(self, df):
         self.__surface_proteins_raw_data = df

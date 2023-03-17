@@ -1,5 +1,4 @@
 from processors.pantherprocessor import PantherProcessor
-import pandas as pd
 import logging
 import asyncio
 

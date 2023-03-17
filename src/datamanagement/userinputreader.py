@@ -67,8 +67,3 @@ class UserInputReader(ABC):
     def get_plot_format(self):
         return self.__plot_format
     
-    
-    
-    
-
-    
