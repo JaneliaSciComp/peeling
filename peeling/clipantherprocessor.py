@@ -1,4 +1,4 @@
-from processors.pantherprocessor import PantherProcessor
+from peeling.pantherprocessor import PantherProcessor
 import logging
 import asyncio
 

@@ -3,10 +3,10 @@ import os
 from datetime import datetime
 import logging
 import matplotlib.pyplot as plt
-from datamanagement.cliuniprotcommunicator import CliUniProtCommunicator
-from datamanagement.cliuserinputreader import CliUserInputReader
-from processors.cliprocessor import CliProcessor
-from processors.clipantherprocessor import CliPantherProcessor
+from peeling.cliuniprotcommunicator import CliUniProtCommunicator
+from peeling.cliuserinputreader import CliUserInputReader
+from peeling.cliprocessor import CliProcessor
+from peeling.clipantherprocessor import CliPantherProcessor
 
 logger = logging.getLogger('peeling')
 #TODO: set level based on verbose option

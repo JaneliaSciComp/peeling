@@ -1,7 +1,7 @@
 from fastapi import UploadFile
 import pandas as pd
 import csv
-from datamanagement.userinputreader import UserInputReader
+from peeling.userinputreader import UserInputReader
 import logging
 
 logger = logging.getLogger('peeling')

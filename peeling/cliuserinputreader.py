@@ -1,5 +1,5 @@
 import pandas as pd
-from datamanagement.userinputreader import UserInputReader
+from peeling.userinputreader import UserInputReader
 import logging
 
 logger = logging.getLogger('peeling')

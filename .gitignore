@@ -64,3 +64,4 @@ env/
 src/.DS_Store
 results/
 test/test_output/
+dist/

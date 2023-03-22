@@ -11,6 +11,7 @@ import logging
 
 logger = logging.getLogger('peeling')
 
+TIME_OUT = 600
 MAX_KEEPALIVE_CONNECTIONS=10
 MAX_CONNECTIONS=15
 CONNECT_RETRY = 5
@@ -38,7 +39,7 @@ class UniProtCommunicator(ABC):
     def __create_client(self):
         limits = httpx.Limits(max_keepalive_connections=MAX_KEEPALIVE_CONNECTIONS, max_connections=MAX_CONNECTIONS)
         transport = httpx.AsyncHTTPTransport(retries=CONNECT_RETRY)
-        self.__client = httpx.AsyncClient(http2=True, limits=limits, transport=transport, event_hooks={'response': [self.__check_response]})
+        self.__client = httpx.AsyncClient(http2=True, timeout=TIME_OUT, limits=limits, transport=transport, event_hooks={'response': [self.__check_response]})
 
 
     async def __check_response(self, response):

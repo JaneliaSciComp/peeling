@@ -1,4 +1,4 @@
-from datamanagement.uniprotcommunicator import UniProtCommunicator
+from peeling.uniprotcommunicator import UniProtCommunicator
 import pandas as pd
 import numpy as np
 from datetime import datetime

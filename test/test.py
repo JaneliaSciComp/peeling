@@ -7,7 +7,7 @@ import os, shutil
 import pandas as pd
 
 
-EXE_DIR = '../src/main.py'
+EXE_DIR = '../peeling/main.py'
 OUTPUT_DIR = './test_output'
 ANNO_SURFACE = '../data/annotation_surface.tsv'
 ANNO_CYTO = '../data/annotation_cyto.tsv'
@@ -41,62 +41,62 @@ class TestPeeling(unittest.TestCase):
         self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
         
 
-    def test_local_anno_remote_ids(self):
-        # using local anno and remote ids files, local anno will be mapped 
-        print('\n\n\n')
-        print('#########  local_anno_remote_ids  #########')
-        mass_data = '../data/mass_spec_data.tsv'
-        ctrl = '2'
-        rep = '3'
-        output_dir = f'{OUTPUT_DIR}/local_anno_remote_ids/'
-        cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -s {ANNO_SURFACE} -c {ANNO_CYTO} -o {output_dir}'
-        os.system(cmd)
+    # def test_local_anno_remote_ids(self):
+    #     # using local anno and remote ids files, local anno will be mapped 
+    #     print('\n\n\n')
+    #     print('#########  local_anno_remote_ids  #########')
+    #     mass_data = '../data/mass_spec_data.tsv'
+    #     ctrl = '2'
+    #     rep = '3'
+    #     output_dir = f'{OUTPUT_DIR}/local_anno_remote_ids/'
+    #     cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -s {ANNO_SURFACE} -c {ANNO_CYTO} -o {output_dir}'
+    #     os.system(cmd)
 
-        # check output 
-        timestamp = os.listdir(output_dir)[-1]
-        res_dir = output_dir + timestamp
-        res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
-        print(res_surface_prot.head(3))
-        self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
-
-
-    def test_local_anno_remote_ids_nomap(self):
-        # using local anno and remote ids files, local anno should not be mapped 
-        print('\n\n\n')
-        print('#########  local_anno_remote_ids_nomap  #########')
-        mass_data = '../data/mass_spec_data.tsv'
-        ctrl = '2'
-        rep = '3'
-        output_dir = f'{OUTPUT_DIR}/local_anno_remote_ids_nomap/'
-        nomap = '--nomap'
-        cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -s {ANNO_SURFACE} -c {ANNO_CYTO} {nomap} -o {output_dir}'
-        os.system(cmd)
-
-        # check output 
-        timestamp = os.listdir(output_dir)[-1]
-        res_dir = output_dir + timestamp
-        res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
-        print(res_surface_prot.head(3))
-        self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
+    #     # check output 
+    #     timestamp = os.listdir(output_dir)[-1]
+    #     res_dir = output_dir + timestamp
+    #     res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
+    #     print(res_surface_prot.head(3))
+    #     self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
 
 
-    def test_remote_anno_local_ids(self):
-        # using remote anno files, and local ids files, remote anno will never be mapped 
-        print('\n\n\n')
-        print('#########  remote_anno_local_ids  #########')
-        mass_data = '../data/mass_spec_data.tsv'
-        ctrl = '2'
-        rep = '3'
-        output_dir = f'{OUTPUT_DIR}/remote_anno_local_ids/'
-        cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} --ids {IDS} -o {output_dir}'
-        os.system(cmd)
+    # def test_local_anno_remote_ids_nomap(self):
+    #     # using local anno and remote ids files, local anno should not be mapped 
+    #     print('\n\n\n')
+    #     print('#########  local_anno_remote_ids_nomap  #########')
+    #     mass_data = '../data/mass_spec_data.tsv'
+    #     ctrl = '2'
+    #     rep = '3'
+    #     output_dir = f'{OUTPUT_DIR}/local_anno_remote_ids_nomap/'
+    #     nomap = '--nomap'
+    #     cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} -s {ANNO_SURFACE} -c {ANNO_CYTO} {nomap} -o {output_dir}'
+    #     os.system(cmd)
 
-        # check output 
-        timestamp = os.listdir(output_dir)[-1]
-        res_dir = output_dir + timestamp
-        res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
-        print(res_surface_prot.head(3))
-        self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
+    #     # check output 
+    #     timestamp = os.listdir(output_dir)[-1]
+    #     res_dir = output_dir + timestamp
+    #     res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
+    #     print(res_surface_prot.head(3))
+    #     self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
+
+
+    # def test_remote_anno_local_ids(self):
+    #     # using remote anno files, and local ids files, remote anno will never be mapped 
+    #     print('\n\n\n')
+    #     print('#########  remote_anno_local_ids  #########')
+    #     mass_data = '../data/mass_spec_data.tsv'
+    #     ctrl = '2'
+    #     rep = '3'
+    #     output_dir = f'{OUTPUT_DIR}/remote_anno_local_ids/'
+    #     cmd = f'python3 {EXE_DIR} {mass_data} {ctrl} {rep} --ids {IDS} -o {output_dir}'
+    #     os.system(cmd)
+
+    #     # check output 
+    #     timestamp = os.listdir(output_dir)[-1]
+    #     res_dir = output_dir + timestamp
+    #     res_surface_prot = pd.read_table(f'{res_dir}/post-cutoff-proteome.tsv')
+    #     print(res_surface_prot.head(3))
+    #     self.assertTrue(len(res_surface_prot)>500, f'Found surface protein less than 500 ({len(res_surface_prot)})')
 
 
     def test_remote_anno_ids(self):

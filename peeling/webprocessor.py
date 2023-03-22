@@ -1,4 +1,4 @@
-from processors.processor import Processor
+from peeling.processor import Processor
 import os
 #import shutil
 import uuid

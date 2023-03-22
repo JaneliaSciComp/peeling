@@ -1,4 +1,4 @@
-from datamanagement.uniprotcommunicator import UniProtCommunicator
+from peeling.uniprotcommunicator import UniProtCommunicator
 
 
 class CliUniProtCommunicator(UniProtCommunicator):

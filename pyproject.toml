@@ -4,17 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "peeling"
-version = "0.1.0"
+version = "0.1.2"
 authors = [
   { name="HHMI Janelia", email="peeling@janelia.hhmi.org" },
 ]
 readme = "README.md"
+license = {file = "LICENSE"}
 requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
 ]
+
 dependencies = [
     "anyio==3.6.2",
     "certifi==2022.9.24",
@@ -52,7 +54,10 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
+include = ["peeling"]  # ["*"] by default
+exclude = []  # empty by default
+namespaces = false  # true by default
 
 [project.scripts]
-peeling = peeling.main:main'
+peeling = 'peeling.main:main'
