@@ -10,7 +10,9 @@ This `PEELing` program provides an automated, standardized, and easy-to-use anal
 
 
 ### Installation
+```
 pip install peeling
+```
 
 
 ### Basic Usage
