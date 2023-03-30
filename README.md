@@ -49,7 +49,7 @@ peeling mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates --i
 ### Panther analysis
 PEELing provides the functionality to perform protein ontology and pathway analyses of the post-cutoff proteome using the [Panther](http://www.pantherdb.org/) API. Top 10 terms based on false discovery rate (FDR) are listed for protein localization (Panther GO Slim Cellular Component), function (Panther GO Slim Biological Process), and pathway (Reactome).
 
-To run this analysis, specify `-p/--panther` and provide the organism from which the mass spec data is made. Please refer to Panther's API [page](http://pantherdb.org/services/oai/pantherdb/supportedgenomes) for supported organism. Choose the corresponding 'long_names', and wrap it by quotes if there is white space inside the name, e.g. 'Homo sapiens'"
+To run this analysis, specify `-p/--panther` and provide the organism from which the mass spec data is made. Please refer to Panther's API [page](http://pantherdb.org/services/oai/pantherdb/supportedgenomes) for supported organism. Choose the corresponding 'long_names', and wrap it by quotes if there is white space inside the name, e.g. 'Homo sapiens'
 ```
 peeling mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates -p organism
 ```
