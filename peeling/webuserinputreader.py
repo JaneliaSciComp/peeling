@@ -19,7 +19,7 @@ class WebUserInputReader(UserInputReader):
         reader = csv.DictReader(lines, delimiter="\t", quotechar='"')
         df = pd.DataFrame(list(reader))
         logger.debug(f'\n{df.head()}')
-        self._check_file(df)        
+        self._check_file(df)
         return df
 
 
@@ -29,7 +29,7 @@ class WebUserInputReader(UserInputReader):
         self._check_mass_spec_file(data)
         logger.info('Read in %d rows and %d columns from mass spec data' % data.shape)
         return data
-    
+
 
     # implement abstract method
     def get_mass_spec_filename(self):
