@@ -34,9 +34,9 @@ The order of the three required arguments should NOT be changed.
 | Content Cell |          Content Cell          |          Content Cell          |          Content Cell          |          Content Cell          |          Content Cell          |          Content Cell          |
 
 #### Note
-The basic usage will communicate with the UniProt website to map the IDs to the latest version, and get the annotation data of surface proteins (TP) and introcellular proteins (FP). As of our testing, it will take dozens of seconds to minutes for the process. 
+The basic usage will communicate with the UniProt website to map the provided IDs to their latest version, and get the annotation data of surface proteins (TP) and introcellular proteins (FP). Our testing shows that this can take dozens of seconds or minutes to complete.
 
-Therefore, it is recommended to save the retrieved data when first time run it, and use the locally saved data for the following runs, which will reduce the run time to seconds. If using local annotation files, PEELing does id mapping by default. To disable id mapping for local annotation files specify -n/--nomap. Remember to update the retrieved data periodically.
+Therefore, it is recommended to save the retrieved data after the first run, and use the locally saved data for the following runs, which will reduce the run time to seconds. If using local annotation files, PEELing does id mapping by default. To disable id mapping for local annotation files specify -n/--nomap. Note: Remember to update the retrieved data periodically.
 ```
 # To save the retrieved data, specify -a/--cache
 peeling mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates --cache
