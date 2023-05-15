@@ -31,7 +31,7 @@ class WebProcessor(Processor):
     #override superclass method
     def _mass_data_clean(self, data):
         data = super()._mass_data_clean(data)
-        data.to_csv(f'../results/{self.__uuid}/mass_spec_data.tsv', sep='\t', index=False) 
+        data.to_csv(f'../results/{self.__uuid}/mass_spec_data.tsv', sep='\t', index=False)
         return data
 
 
@@ -50,16 +50,16 @@ class WebProcessor(Processor):
         '''
         type: 'true_positive' or 'false_positive'
         '''
-        annotation = await self._get_uniprot_communicator().get_annotation(type) 
+        annotation = await self._get_uniprot_communicator().get_annotation(type)
         # logger.debug(f'\n{annotation.head()}')
         return annotation.copy()
-    
+
 
     # implement abstract method
-    def _plot_supplemental(self, fig_name): #plt, 
+    def _plot_supplemental(self, fig_name): #plt,
         plt.savefig(f'{self.__web_plots_path}/{fig_name}.jpeg', dpi=130, bbox_inches='tight')
         plt.close()
- 
+
 
     # implement abstract method
     def _construct_path(self):
@@ -69,12 +69,12 @@ class WebProcessor(Processor):
         results_path = os.path.join(parent_path, 'results')
         web_plots_path = os.path.join(parent_path, "web_plots")
         self.__web_plots_path = web_plots_path
-        try: 
-            os.makedirs(web_plots_path, exist_ok=True) 
-        except OSError as error: 
+        try:
+            os.makedirs(web_plots_path, exist_ok=True)
+        except OSError as error:
             logger.error(error)
         return results_path
-    
+
 
     # overriding method of super class
     def _write_args(self, path):
@@ -82,7 +82,7 @@ class WebProcessor(Processor):
         with open(os.path.join(path, 'log.txt'), 'a') as f:
             f.write('Failed id mapping: ' + str(self.__failed_id_mapping) + '\n')
 
-    
+
     # implement abstract method
     async def start(self):
         data = await self._get_user_input_reader().get_mass_data()

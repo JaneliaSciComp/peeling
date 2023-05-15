@@ -26,7 +26,7 @@ class WebUniProtCommunicator(UniProtCommunicator):
             saved_ids_set = set(self.__ids['From'])
             to_retrieve = old_ids_set.difference(saved_ids_set)
             logger.info(f'before retrieve, cached ids: {len(self.__ids)}')
-        
+
         logger.info(f'to retrieve: {len(to_retrieve)}')
         if len(to_retrieve) > 0:
             retrieved_data = await self._retrieve_latest_id(list(to_retrieve), meta)
@@ -48,7 +48,7 @@ class WebUniProtCommunicator(UniProtCommunicator):
             retrieved_data = pd.concat([retrieved_data, no_mapping_ids])
             # logger.debug(f'\n{no_mapping_ids.head()}')
         return retrieved_data
- 
+
 
     async def __initialize(self):
         start_time = datetime.now()
@@ -70,7 +70,7 @@ class WebUniProtCommunicator(UniProtCommunicator):
                 self._set_annotation(annotation_false_positive, 'false_positive')
             else:
                 has_data = False
-            
+
             if not has_data:
                 await self._retrieve_annotation()
                 true_positive = await self.get_annotation('true_positive')
@@ -78,20 +78,20 @@ class WebUniProtCommunicator(UniProtCommunicator):
                 false_positive = await self.get_annotation('false_positive')
                 false_positive.to_csv('../retrieved_data/annotation_false_positive.tsv', sep='\t', index=False)
                 logger.info(f'Annotation files saved')
-        
+
             id_path = '../retrieved_data/latest_ids.tsv'
             if os.path.exists(id_path):
                 self.__ids = pd.read_table(id_path, sep='\t', header=0)
                 logger.info(f'Read in {len(self.__ids)} entries from archived latest_ids file')
-        
+
             end_time = datetime.now()
             logger.info(f'Initialization is done. Time: {end_time-start_time}')
-        
+
         except Exception as e:
             logger.error('Initialization failed')
             logger.info(e)
             raise
-        
+
 
 
     async def update_data(self):
@@ -125,8 +125,8 @@ class WebUniProtCommunicator(UniProtCommunicator):
                 self.__track_update += 1
             except Exception as e:
                 logger.error(e)
-        
-    
+
+
     # called in main.py, to export cached ids by api instead of waiting for update
     def get_ids(self):
         return self.__ids
