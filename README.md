@@ -65,7 +65,9 @@ peeling mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates -p 
 -i, --ids    Latest_ids file directory including filename, e.g. data/id_mapping.tsv
 
 --tp, --true-positive   path to true positive annotation file, e.g. data/annotation_true_positive.tsv
+
 --fp, --false-positive  path to false positive annotation file, e.g. data/annotation_false_positive.tsv
+
 -a, --cache    Save the data retrieved from UniProt on the local computer, true if specified
 
 -f, --format    The format of the output plots, default is png. Supported formats depend on the computation platform, use -h/--help to see supported formats
@@ -75,4 +77,5 @@ peeling mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates -p 
 -p, --panther    The organism from which the mass spec data is made, a required input for Panther enrichment analysis. Please refer to Panther's API page http://pantherdb.org/services/oai/pantherdb/supportedgenomes for supported organism. Choose the corresponding 'long_names', and wrap it by quotes, e.g. 'Homo sapiens'
 
 --cc, --cellular_compartment    Choose between: cs - cell surface [default], mt - mitochondria, nu - nucleus or ot - other. If other is chosen, the true positive (--tp) and false positive (--fp) files must be specified
+
 -v --verbose    Enables verbose debugging output
