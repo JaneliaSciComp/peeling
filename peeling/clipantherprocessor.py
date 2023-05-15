@@ -1,6 +1,6 @@
-from peeling.pantherprocessor import PantherProcessor
 import logging
 import asyncio
+from peeling.pantherprocessor import PantherProcessor
 
 logger = logging.getLogger('peeling')
 

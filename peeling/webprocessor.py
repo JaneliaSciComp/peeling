@@ -1,10 +1,10 @@
-from peeling.processor import Processor
 import os
 #import shutil
 import uuid
 import logging
 import matplotlib.pyplot as plt
 import pandas as pd
+from peeling.processor import Processor
 
 
 logger = logging.getLogger('peeling')
@@ -18,7 +18,7 @@ class WebProcessor(Processor):
             self.__uuid = None
             self.__web_plots_path = None
             self.__failed_id_mapping = 0
-            self.__surface_proteins_raw_data = None
+            self.__true_positive_proteins_raw_data = None
         elif len(args) == 3:
             unique_id, x, y = args
             self.__uuid = unique_id
@@ -48,7 +48,7 @@ class WebProcessor(Processor):
     # implement abstract method
     async def _get_annotation_data(self, type):
         '''
-        type: 'surface' or 'cyto'
+        type: 'true_positive' or 'false_positive'
         '''
         annotation = await self._get_uniprot_communicator().get_annotation(type) 
         # logger.debug(f'\n{annotation.head()}')
@@ -90,7 +90,7 @@ class WebProcessor(Processor):
         data = self._mass_data_clean(data)
         columns = list(data.columns[1:])
         await self._analyze(data, results_path)
-        self.__surface_proteins_raw_data.to_csv(f'../results/{self.__uuid}/post-cutoff-proteome_with_raw_data.tsv', sep='\t', index=False)
+        self.__true_positive_proteins_raw_data.to_csv(f'../results/{self.__uuid}/post-cutoff-proteome_with_raw_data.tsv', sep='\t', index=False)
         self._write_args(results_path)
         logger.info(f'Results saved at {self.__uuid}')
         #shutil.make_archive(f'../results/{self.__uuid}/results', 'zip', root_dir=f'../results/{self.__uuid}/results')
@@ -146,5 +146,5 @@ class WebProcessor(Processor):
             raise
 
 
-    def _set_surface_proteins_raw_data(self, df):
-        self.__surface_proteins_raw_data = df
+    def _set_true_positive_proteins_raw_data(self, df):
+        self.__true_positive_proteins_raw_data = df

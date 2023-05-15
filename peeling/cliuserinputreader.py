@@ -1,18 +1,18 @@
 import pandas as pd
-from peeling.userinputreader import UserInputReader
 import logging
+from peeling.userinputreader import UserInputReader
 
 logger = logging.getLogger('peeling')
 
 
 class CliUserInputReader(UserInputReader):
-    def __init__(self, mass_filename, num_controls, num_replicates, output_directory, tolerance, ids_filename, annotation_surface_filename, annotation_cyto_filename, cache, plot_format, no_id_mapping):
-        super().__init__(num_controls, num_replicates, tolerance, plot_format)
+    def __init__(self, mass_filename, num_controls, num_replicates, output_directory, tolerance, ids_filename, true_positive_filename, false_positive_filename, cache, plot_format, no_id_mapping, cellular_compartment):
+        super().__init__(num_controls, num_replicates, tolerance, plot_format, cellular_compartment)
         self.__mass_filename = mass_filename
         self.__output_directory = output_directory
         self.__ids_filename = ids_filename
-        self.__annotation_surface_filename = annotation_surface_filename
-        self.__annotation_cyto_filename = annotation_cyto_filename
+        self.__true_positive_filename = true_positive_filename
+        self.__false_positive_filename = false_positive_filename
         self.__save = cache
         self.__no_id_mapping = no_id_mapping
 
@@ -49,12 +49,12 @@ class CliUserInputReader(UserInputReader):
         return self.__ids_filename
     
 
-    def get_annotation_surface_filename(self):
-        return self.__annotation_surface_filename
+    def get_true_positive_filename(self):
+        return self.__true_positive_filename
     
 
-    def get_annotation_cyto_filename(self):
-        return self.__annotation_cyto_filename
+    def get_false_positive_filename(self):
+        return self.__false_positive_filename
 
 
     def get_latest_ids(self):
@@ -68,22 +68,22 @@ class CliUserInputReader(UserInputReader):
             raise
         
 
-    def get_annotation_surface(self):
-        df = self.__read_file(self.__annotation_surface_filename)
+    def get_annotation_true_positive(self):
+        df = self.__read_file(self.__true_positive_filename)
         try:
-            assert(df.shape[1] >= 1), 'Annotation_surface file should have at least one column containing ids of extracellular proteins'    
-            logger.info('Read in %d rows from annotation_surface file' % (len(df)))
+            assert(df.shape[1] >= 1), 'Annotation_true_positive file should have at least one column containing ids of proteins in your selected cellular compartment'
+            logger.info('Read in %d rows from annotation_true_positive file' % (len(df)))
             return df
         except AssertionError as e:
             logger.error(e)
             raise
        
 
-    def get_annotation_cyto(self):
-        df = self.__read_file(self.__annotation_cyto_filename)
+    def get_annotation_false_positive(self):
+        df = self.__read_file(self.__false_positive_filename)
         try:
-            assert(df.shape[1] >= 1), 'Annotation_cyto file should have at least one column containing ids of intracellular proteins'    
-            logger.info('Read in %d rows from annotation_cyto file' % (len(df)))
+            assert(df.shape[1] >= 1), 'Annotation_false_positive file should have at least one column containing ids of proteins that are not found in your selected cellular compartment'
+            logger.info('Read in %d rows from annotation_false_positive file' % (len(df)))
             return df
         except AssertionError as e:
             logger.error(e)

@@ -81,7 +81,7 @@ class Processor(ABC):
 
     def __merge_annotation(self, mass_data, annotation, type):
         '''
-        type: 'surface' or 'cyto'
+        type: 'true_positive' or 'false_positive'
         '''
         annotation['Add'] = 1
         annotation.drop_duplicates(keep='first', inplace=True)
@@ -89,7 +89,7 @@ class Processor(ABC):
         annotation.set_index('Entry', inplace=True)
 
         mass_data = mass_data.merge(annotation, how='left', left_index=True, right_index=True)
-        new_col_name = 'TP' if type=='surface' else 'FP'
+        new_col_name = 'TP' if type=='true_positive' else 'FP'
         mass_data.rename(columns={'Add': new_col_name}, inplace=True)
 
         mass_data[new_col_name] = mass_data[new_col_name].fillna(0)
@@ -171,12 +171,12 @@ class Processor(ABC):
         return fig_name
 
 
-    def __get_surface_proteins(self, data, path, plots_path):
+    def __get_true_positive_proteins(self, data, path, plots_path):
         '''
-        If a protein is included in at least num_ctrl * num_rep - tolerance columns, output it as surface protein
+        If a protein is included in at least num_ctrl * num_rep - tolerance columns, output it as true_positive protein
 
         Output
-        Accession ids of the surface proteins
+        Accession ids of the true_positive proteins
         '''
         total_col = self.__user_input_reader.get_num_controls() * self.__user_input_reader.get_num_replicates()
         start_col = 0
@@ -194,18 +194,18 @@ class Processor(ABC):
         col_name = 'include_sum'
         data[col_name] = data.iloc[:, -total_col:].sum(axis=1)
 
-        surface_proteins = data[data[col_name] >= threshold].iloc[:, :total_col+4]
-        surface_proteins.reset_index(inplace=True)
-        surface_proteins.dropna(subset='Entry', axis=0, how='any')
-        surface_proteins.drop_duplicates(subset='Entry', keep='first', inplace=True)
-        surface_proteins_raw_data =  surface_proteins
-        self._set_surface_proteins_raw_data(surface_proteins_raw_data)
-        surface_proteins = surface_proteins[['Entry', 'Gene Names', 'Protein names', 'Organism', 'Length']]
+        true_positive_proteins = data[data[col_name] >= threshold].iloc[:, :total_col+4]
+        true_positive_proteins.reset_index(inplace=True)
+        true_positive_proteins.dropna(subset='Entry', axis=0, how='any')
+        true_positive_proteins.drop_duplicates(subset='Entry', keep='first', inplace=True)
+        true_positive_proteins_raw_data =  true_positive_proteins
+        self._set_true_positive_proteins_raw_data(true_positive_proteins_raw_data)
+        true_positive_proteins = true_positive_proteins[['Entry', 'Gene Names', 'Protein names', 'Organism', 'Length']]
 
-        logger.info(f'{len(surface_proteins)} surface proteins found')
-        surface_proteins.to_csv(f'{path}/post-cutoff-proteome.tsv', sep='\t', index=False)
-        # save a txt file containing just surface protein ids separated by ',', so that easily copy to put in other web
-        proteins_str = ','.join(list(surface_proteins['Entry']))
+        logger.info(f'{len(true_positive_proteins)} true_positive proteins found')
+        true_positive_proteins.to_csv(f'{path}/post-cutoff-proteome.tsv', sep='\t', index=False)
+        # save a txt file containing just true_positive protein ids separated by ',', so that easily copy to put in other web
+        proteins_str = ','.join(list(true_positive_proteins['Entry']))
         with open(f'{path}/post-cutoff-proteome.txt', 'w') as f:
             f.write(proteins_str)
 
@@ -226,26 +226,30 @@ class Processor(ABC):
         self._plot_supplemental(fig_name)
         id_mapping_data = await self._get_id_mapping_data(data)
         data = self._merge_id(data, id_mapping_data)
-        annotation_surface = await self._get_annotation_data('surface')
-        data = self.__merge_annotation(data, annotation_surface, 'surface')
-        annotation_cyto = await self._get_annotation_data('cyto')
-        data = self.__merge_annotation(data, annotation_cyto, 'cyto')
+        annotation_true_positive = await self._get_annotation_data('true_positive')
+        data = self.__merge_annotation(data, annotation_true_positive, 'true_positive')
+        annotation_false_positive = await self._get_annotation_data('false_positive')
+        data = self.__merge_annotation(data, annotation_false_positive, 'false_positive')
 
-        self.__get_surface_proteins(data, parent_path, plots_path)
+        self.__get_true_positive_proteins(data, parent_path, plots_path)
 
 
     def _write_args(self, path):
         with open(os.path.join(path, 'log.txt'), 'w') as f:
             f.write('Mass spec file: ' + str(self.__user_input_reader.get_mass_spec_filename()) + '\n')
+            cellular_compartment = self._get_user_input_reader().get_cellular_compartment()
+            if cellular_compartment is not None:
+                f.write(f'Cellular compartment: {cellular_compartment}\n')
             f.write(f'Number of controls: {self.__user_input_reader.get_num_controls()}\n')
             f.write(f'Number of replicates: {self.__user_input_reader.get_num_replicates()}\n')
             f.write(f'Tolerance: {self.__user_input_reader.get_tolerance()}\n')
             f.write(f'Plot format: {self.__user_input_reader.get_plot_format()}\n')
 
 
+
     @abstractmethod
     def start(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
     def _get_user_input_reader(self):

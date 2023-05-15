@@ -6,11 +6,12 @@ logger = logging.getLogger('peeling')
 
 
 class UserInputReader(ABC):
-    def __init__(self, num_controls, num_replicates, tolerance, plot_format):
+    def __init__(self, num_controls, num_replicates, tolerance, plot_format, cellular_compartment):
         self.__num_controls = num_controls
         self.__num_replicates = num_replicates
         self.__tolerance = tolerance
         self.__plot_format = plot_format
+        self.__cellular_compartment = 'cs' if cellular_compartment is None else cellular_compartment
         self.__check_init()
     
 
@@ -44,12 +45,12 @@ class UserInputReader(ABC):
 
     @abstractmethod
     def get_mass_data(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
     @abstractmethod
     def get_mass_spec_filename(self):
-        raise NotImplemented()
+        raise NotImplementedError()
     
 
     def get_num_controls(self):
@@ -66,4 +67,6 @@ class UserInputReader(ABC):
 
     def get_plot_format(self):
         return self.__plot_format
-    
+
+    def get_cellular_compartment(self):
+        return self.__cellular_compartment

@@ -154,12 +154,12 @@ class PantherProcessor(ABC):
 
     @abstractmethod
     def start(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     
     @abstractmethod
     def _write_args(self):
-        raise NotImplemented()
+        raise NotImplementedError()
     
     
     def _set_organism_id(self, id):

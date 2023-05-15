@@ -8,8 +8,13 @@ import csv
 import pandas as pd
 from abc import ABC, abstractmethod
 import logging
+from peeling.cellular_compartments import cellular_compartments
 
 logger = logging.getLogger('peeling')
+
+
+# surface = true positive
+# cyto = false positive
 
 TIME_OUT = 600
 MAX_KEEPALIVE_CONNECTIONS=10
@@ -21,19 +26,13 @@ API_URL = "https://rest.uniprot.org"
 
 CHUNK_SIZE = 2000 #TODO: tune CHUNK_SIZE
 
-# urls for cache have more fields (option for cli user to save retrieved data)
-SURFACE_URL_CACHE = "https://rest.uniprot.org/uniprotkb/search?compressed=true&fields=accession%2Creviewed%2Cid%2Cgene_names%2Corganism_name%2Ccc_subcellular_location&format=tsv&query=%28%28%28cc_scl_term%3ASL-0112%29%20OR%20%28cc_scl_term%3ASL-0243%29%20OR%20%28keyword%3AKW-0732%29%20OR%20%28cc_scl_term%3ASL-9906%29%20OR%20%28cc_scl_term%3ASL-9907%29%29%20AND%20%28reviewed%3Atrue%29%29&size=500"
-CYTO_URL_CACHE = "https://rest.uniprot.org/uniprotkb/search?compressed=true&fields=accession%2Creviewed%2Cid%2Cgene_names%2Corganism_name%2Ccc_subcellular_location&format=tsv&query=%28%28%28%28cc_scl_term%3ASL-0091%29%20OR%20%28cc_scl_term%3ASL-0173%29%20OR%20%28cc_scl_term%3ASL-0191%29%29%20AND%20%28reviewed%3Atrue%29%29%20NOT%20%28%28%28cc_scl_term%3ASL-0112%29%20OR%20%28cc_scl_term%3ASL-0243%29%20OR%20%28keyword%3AKW-0732%29%20OR%20%28cc_scl_term%3ASL-9906%29%20OR%20%28cc_scl_term%3ASL-9907%29%29%20AND%20%28reviewed%3Atrue%29%29%29&size=500"
-SURFACE_URL = "https://rest.uniprot.org/uniprotkb/search?compressed=true&fields=accession&format=tsv&query=%28%28%28cc_scl_term%3ASL-0112%29%20OR%20%28cc_scl_term%3ASL-0243%29%20OR%20%28keyword%3AKW-0732%29%20OR%20%28cc_scl_term%3ASL-9906%29%20OR%20%28cc_scl_term%3ASL-9907%29%29%20AND%20%28reviewed%3Atrue%29%29&size=500"
-CYTO_URL = "https://rest.uniprot.org/uniprotkb/search?compressed=true&fields=accession&format=tsv&query=%28%28%28%28cc_scl_term%3ASL-0091%29%20OR%20%28cc_scl_term%3ASL-0173%29%20OR%20%28cc_scl_term%3ASL-0191%29%29%20AND%20%28reviewed%3Atrue%29%29%20NOT%20%28%28%28cc_scl_term%3ASL-0112%29%20OR%20%28cc_scl_term%3ASL-0243%29%20OR%20%28keyword%3AKW-0732%29%20OR%20%28cc_scl_term%3ASL-9906%29%20OR%20%28cc_scl_term%3ASL-9907%29%29%20AND%20%28reviewed%3Atrue%29%29%29&size=500"
-
-
 class UniProtCommunicator(ABC):
-    def __init__(self, cache):
+    def __init__(self, cache, cellular_compartment='cs'):
         self.__save = cache
         self.__client = None
-        self.__annotation_surface = None
-        self.__annotation_cyto = None
+        self.__annotation_true_positive = None
+        self.__annotation_false_positive = None
+        self.__cellular_compartment = cellular_compartments.get(cellular_compartment, None)
 
 
     def __create_client(self):
@@ -214,35 +213,55 @@ class UniProtCommunicator(ABC):
 
 
     @abstractmethod
-    def get_latest_id():
-        raise NotImplemented()
+    def get_latest_id(self):
+        raise NotImplementedError()
 
 
-    async def __retrieve_annotation_surface(self):
+    def __get_uniprot_url(self, type):
+        if not self.__cellular_compartment:
+            return None
+
+        if type == 'true_positive':
+            if self.__save:
+                logger.debug(f'using true_positive cache url for {self.__cellular_compartment.get("long_name")}')
+                return self.__cellular_compartment.get('true_positive_cache')
+            logger.debug(f'using true_positive url for {self.__cellular_compartment.get("long_name")}')
+            return self.__cellular_compartment.get('true_positive')
+        elif type == 'false_positive':
+            if self.__save:
+                logger.debug(f'using false_positive cache url for {self.__cellular_compartment.get("long_name")}')
+                return self.__cellular_compartment.get('false_positive_cache')
+            logger.debug(f'using false_positive url for {self.__cellular_compartment.get("long_name")}')
+            return self.__cellular_compartment.get('false_positive')
+        else:
+            raise Exception('__get_uniprot_url expects a type of either true_positive or false_positive')
+
+
+    async def __retrieve_annotation_true_positive(self):
         try:
-            logger.info('Retrieving annotation_surface file from UniProt...')
-            url = SURFACE_URL_CACHE if self.__save else SURFACE_URL
+            logger.info('Retrieving annotation_true_positive file from UniProt...')
+            url = self.__get_uniprot_url('true_positive')
             results = await self.__get_annotation_results_search(url)
             results = self.__get_data_frame_from_tsv_results(results)
-            logger.info(f'Retrieved {len(results)} entries for annotation_surface')
-            self.__annotation_surface = results
+            logger.info(f'Retrieved {len(results)} entries for annotation_true_positive')
+            self.__annotation_true_positive = results
         except Exception as e:
             logger.error(e)
-            logger.info(f'Retrieving annotation_surface failed')
+            logger.info(f'Retrieving annotation_true_positive failed')
             raise
 
 
-    async def __retrieve_annotation_cyto(self):
+    async def __retrieve_annotation_false_positive(self):
         try:
-            logger.info('Retrieving annotation_cyto file from UniProt...')
-            url = CYTO_URL_CACHE if self.__save else CYTO_URL
+            logger.info('Retrieving annotation_false_positive file from UniProt...')
+            url = self.__get_uniprot_url('false_positive')
             results = await self.__get_annotation_results_search(url)
             results = self.__get_data_frame_from_tsv_results(results)
-            logger.info(f'Retrieved {len(results)} entries for annotation_cyto')
-            self.__annotation_cyto = results
+            logger.info(f'Retrieved {len(results)} entries for annotation_false_positive')
+            self.__annotation_false_positive = results
         except Exception as e:
             logger.error(e)
-            logger.info(f'Retrieving annotation_cyto failed')
+            logger.info(f'Retrieving annotation_false_positive failed')
             raise
 
 
@@ -252,7 +271,7 @@ class UniProtCommunicator(ABC):
         if self.__client is None:
             self.__create_client()
         try:
-            await asyncio.gather(self.__retrieve_annotation_surface(), self.__retrieve_annotation_cyto())
+            await asyncio.gather(self.__retrieve_annotation_true_positive(), self.__retrieve_annotation_false_positive())
             if not self.__save:
                 self.__shorten_annotation()
             logger.info(f'{datetime.now()-start_time} for retrieving annotations')
@@ -265,21 +284,21 @@ class UniProtCommunicator(ABC):
 
 
     async def get_annotation(self, type):
-        if self.__annotation_surface is None or self.__annotation_cyto is None:
+        if self.__annotation_true_positive is None or self.__annotation_false_positive is None:
                 await self._retrieve_annotation()
-        if type=='surface':
-            return self.__annotation_surface
-        elif type=='cyto':
-            return self.__annotation_cyto
+        if type=='true_positive':
+            return self.__annotation_true_positive
+        elif type=='false_positive':
+            return self.__annotation_false_positive
 
 
     def __shorten_annotation(self):
-        self.__annotation_surface = self.__annotation_surface[['Entry']]
-        self.__annotation_cyto = self.__annotation_cyto[['Entry']]
+        self.__annotation_true_positive = self.__annotation_true_positive[['Entry']]
+        self.__annotation_false_positive = self.__annotation_false_positive[['Entry']]
 
 
     def _set_annotation(self, data, type):
-        if type=='surface':
-            self.__annotation_surface = data
-        elif type=='cyto':
-            self.__annotation_cyto = data
+        if type=='true_positive':
+            self.__annotation_true_positive = data
+        elif type=='false_positive':
+            self.__annotation_false_positive = data

@@ -1,9 +1,9 @@
-from peeling.uniprotcommunicator import UniProtCommunicator
 import pandas as pd
 import numpy as np
 from datetime import datetime
 import logging
 import os
+from peeling.uniprotcommunicator import UniProtCommunicator
 
 logger = logging.getLogger('peeling')
 
@@ -55,28 +55,28 @@ class WebUniProtCommunicator(UniProtCommunicator):
         logger.info('Initializing ...')
         try:
             has_data = True
-            surface_path = '../retrieved_data/annotation_surface.tsv'
-            if os.path.exists(surface_path):
-                annotation_surface = pd.read_table(surface_path, sep='\t', header=0)
-                logger.info(f'Read in {len(annotation_surface)} entries from archived annotation_surface file')
-                self._set_annotation(annotation_surface, 'surface')
+            true_positive_path = '../retrieved_data/annotation_true_positive.tsv'
+            if os.path.exists(true_positive_path):
+                annotation_true_positive = pd.read_table(true_positive_path, sep='\t', header=0)
+                logger.info(f'Read in {len(annotation_true_positive)} entries from archived annotation_true_positive file')
+                self._set_annotation(annotation_true_positive, 'true_positive')
             else:
                 has_data = False
 
-            cyto_path = '../retrieved_data/annotation_cyto.tsv'
-            if os.path.exists(cyto_path):
-                annotation_cyto = pd.read_table(cyto_path, sep='\t', header=0)
-                logger.info(f'Read in {len(annotation_cyto)} entries from archived annotation_cyto file')
-                self._set_annotation(annotation_cyto, 'cyto')
+            false_positive_path = '../retrieved_data/annotation_false_positive.tsv'
+            if os.path.exists(false_positive_path):
+                annotation_false_positive = pd.read_table(false_positive_path, sep='\t', header=0)
+                logger.info(f'Read in {len(annotation_false_positive)} entries from archived annotation_false_positive file')
+                self._set_annotation(annotation_false_positive, 'false_positive')
             else:
                 has_data = False
             
             if not has_data:
                 await self._retrieve_annotation()
-                surface = await self.get_annotation('surface')
-                surface.to_csv('../retrieved_data/annotation_surface.tsv', sep='\t', index=False)
-                cyto = await self.get_annotation('cyto')
-                cyto.to_csv('../retrieved_data/annotation_cyto.tsv', sep='\t', index=False)
+                true_positive = await self.get_annotation('true_positive')
+                true_positive.to_csv('../retrieved_data/annotation_true_positive.tsv', sep='\t', index=False)
+                false_positive = await self.get_annotation('false_positive')
+                false_positive.to_csv('../retrieved_data/annotation_false_positive.tsv', sep='\t', index=False)
                 logger.info(f'Annotation files saved')
         
             id_path = '../retrieved_data/latest_ids.tsv'
@@ -115,10 +115,10 @@ class WebUniProtCommunicator(UniProtCommunicator):
                     self.__ids.to_csv('../retrieved_data/latest_ids.tsv', sep='\t', index=False)
                     logger.info('Latest_ids file saved')
                 await self._retrieve_annotation()
-                surface = await self.get_annotation('surface')
-                surface.to_csv('../retrieved_data/annotation_surface.tsv', sep='\t', index=False)
-                cyto = await self.get_annotation('cyto')
-                cyto.to_csv('../retrieved_data/annotation_cyto.tsv', sep='\t', index=False)
+                true_positive = await self.get_annotation('true_positive')
+                true_positive.to_csv('../retrieved_data/annotation_true_positive.tsv', sep='\t', index=False)
+                false_positive = await self.get_annotation('false_positive')
+                false_positive.to_csv('../retrieved_data/annotation_false_positive.tsv', sep='\t', index=False)
                 logger.info(f'Annotation files saved')
                 end_time = datetime.now()
                 logger.info(f'Update is done. Time: {end_time-start_time}')
