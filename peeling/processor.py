@@ -76,7 +76,7 @@ class Processor(ABC):
 
     @abstractmethod
     def _get_annotation_data(self, type):
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
     def __merge_annotation(self, mass_data, annotation, type):

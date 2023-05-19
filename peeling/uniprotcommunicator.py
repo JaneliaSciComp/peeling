@@ -27,12 +27,13 @@ API_URL = "https://rest.uniprot.org"
 CHUNK_SIZE = 2000 #TODO: tune CHUNK_SIZE
 
 class UniProtCommunicator(ABC):
-    def __init__(self, cache, cellular_compartment='cs'):
+    def __init__(self, cache=False, cellular_compartment='cs'):
         self.__save = cache
         self.__client = None
-        self.__annotation_true_positive = None
-        self.__annotation_false_positive = None
+        self._annotation_true_positive = None
+        self._annotation_false_positive = None
         self.__cellular_compartment = cellular_compartments.get(cellular_compartment, None)
+        self._cc_code = cellular_compartment
 
 
     def __create_client(self):
@@ -244,7 +245,7 @@ class UniProtCommunicator(ABC):
             results = await self.__get_annotation_results_search(url)
             results = self.__get_data_frame_from_tsv_results(results)
             logger.info(f'Retrieved {len(results)} entries for annotation_true_positive')
-            self.__annotation_true_positive = results
+            self._annotation_true_positive = results
         except Exception as e:
             logger.error(e)
             logger.info(f'Retrieving annotation_true_positive failed')
@@ -258,7 +259,7 @@ class UniProtCommunicator(ABC):
             results = await self.__get_annotation_results_search(url)
             results = self.__get_data_frame_from_tsv_results(results)
             logger.info(f'Retrieved {len(results)} entries for annotation_false_positive')
-            self.__annotation_false_positive = results
+            self._annotation_false_positive = results
         except Exception as e:
             logger.error(e)
             logger.info(f'Retrieving annotation_false_positive failed')
@@ -284,21 +285,21 @@ class UniProtCommunicator(ABC):
 
 
     async def get_annotation(self, type):
-        if self.__annotation_true_positive is None or self.__annotation_false_positive is None:
+        if self._annotation_true_positive is None or self._annotation_false_positive is None:
                 await self._retrieve_annotation()
         if type=='true_positive':
-            return self.__annotation_true_positive
+            return self._annotation_true_positive
         elif type=='false_positive':
-            return self.__annotation_false_positive
+            return self._annotation_false_positive
 
 
     def __shorten_annotation(self):
-        self.__annotation_true_positive = self.__annotation_true_positive[['Entry']]
-        self.__annotation_false_positive = self.__annotation_false_positive[['Entry']]
+        self._annotation_true_positive = self._annotation_true_positive[['Entry']]
+        self._annotation_false_positive = self._annotation_false_positive[['Entry']]
 
 
     def _set_annotation(self, data, type):
         if type=='true_positive':
-            self.__annotation_true_positive = data
+            self._annotation_true_positive = data
         elif type=='false_positive':
-            self.__annotation_false_positive = data
+            self._annotation_false_positive = data

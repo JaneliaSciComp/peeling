@@ -9,10 +9,15 @@ logger = logging.getLogger('peeling')
 
 
 class WebUniProtCommunicator(UniProtCommunicator):
-    def __init__(self, cache=False):
-        super().__init__(cache)
+    def __init__(self, cache, cellular_compartment, tp_data=None, fp_data=None):
+        super().__init__(cache, cellular_compartment)
         self.__ids = None
         self.__track_update = 0
+        if isinstance(tp_data, pd.DataFrame) and isinstance(fp_data, pd.DataFrame):
+            self._annotation_true_positive = tp_data
+            self._annotation_false_positive = fp_data
+        else:
+            self.__init_annotations()
 
 
     # implement abstract method
@@ -31,7 +36,7 @@ class WebUniProtCommunicator(UniProtCommunicator):
         if len(to_retrieve) > 0:
             retrieved_data = await self._retrieve_latest_id(list(to_retrieve), meta)
             retrieved_data = self.__add_no_mapping_ids(retrieved_data, meta)
-            # logger.debug(f'\n{retrieved_data.head()}')
+            logger.debug(f'\n{retrieved_data.head()}')
 
             self.__ids = pd.concat([self.__ids, retrieved_data])
             logger.info(f'after retrieve, cached ids: {len(self.__ids)}')
@@ -46,37 +51,43 @@ class WebUniProtCommunicator(UniProtCommunicator):
             for col in retrieved_data.columns[1:]:
                 no_mapping_ids[col] = np.NaN
             retrieved_data = pd.concat([retrieved_data, no_mapping_ids])
-            # logger.debug(f'\n{no_mapping_ids.head()}')
+            logger.debug(f'\n{no_mapping_ids.head()}')
         return retrieved_data
+
+
+    def __init_annotations(self):
+        annotation_types = ['true_positive', 'false_positive']
+        for annotation_type in annotation_types:
+            annotation_path = f'../retrieved_data/{self._cc_code}_annotation_{annotation_type}.tsv'
+            if os.path.exists(annotation_path):
+                annotation_data = pd.read_table(annotation_path, sep='\t', header=0)
+                logger.info(f'Read in {len(annotation_data)} entries from cached {self._cc_code}_annotation_{annotation_type} file')
+                self._set_annotation(annotation_data, annotation_type)
+            else:
+                logger.debug(f"*** didn't find cache in {annotation_path}")
 
 
     async def __initialize(self):
         start_time = datetime.now()
         logger.info('Initializing ...')
+        annotation_types = ['true_positive', 'false_positive']
         try:
             has_data = True
-            true_positive_path = '../retrieved_data/annotation_true_positive.tsv'
-            if os.path.exists(true_positive_path):
-                annotation_true_positive = pd.read_table(true_positive_path, sep='\t', header=0)
-                logger.info(f'Read in {len(annotation_true_positive)} entries from archived annotation_true_positive file')
-                self._set_annotation(annotation_true_positive, 'true_positive')
-            else:
-                has_data = False
-
-            false_positive_path = '../retrieved_data/annotation_false_positive.tsv'
-            if os.path.exists(false_positive_path):
-                annotation_false_positive = pd.read_table(false_positive_path, sep='\t', header=0)
-                logger.info(f'Read in {len(annotation_false_positive)} entries from archived annotation_false_positive file')
-                self._set_annotation(annotation_false_positive, 'false_positive')
-            else:
-                has_data = False
+            for annotation_type in annotation_types:
+                annotation_path = f'../retrieved_data/{self._cc_code}_annotation_{annotation_type}.tsv'
+                if os.path.exists(annotation_path):
+                    annotation_data = pd.read_table(annotation_path, sep='\t', header=0)
+                    logger.info(f'Read in {len(annotation_data)} entries from cached {self._cc_code}_annotation_{annotation_type} file')
+                    self._set_annotation(annotation_data, annotation_type)
+                else:
+                    logger.debug(f"*** didn't find cache in {annotation_path}")
+                    has_data = False
 
             if not has_data:
                 await self._retrieve_annotation()
-                true_positive = await self.get_annotation('true_positive')
-                true_positive.to_csv('../retrieved_data/annotation_true_positive.tsv', sep='\t', index=False)
-                false_positive = await self.get_annotation('false_positive')
-                false_positive.to_csv('../retrieved_data/annotation_false_positive.tsv', sep='\t', index=False)
+                for annotation_type in annotation_types:
+                    annotation_data = await self.get_annotation(annotation_type)
+                    annotation_data.to_csv(f'../retrieved_data/{self._cc_code}_annotation_{annotation_type}.tsv', sep='\t', index=False)
                 logger.info(f'Annotation files saved')
 
             id_path = '../retrieved_data/latest_ids.tsv'
@@ -116,9 +127,9 @@ class WebUniProtCommunicator(UniProtCommunicator):
                     logger.info('Latest_ids file saved')
                 await self._retrieve_annotation()
                 true_positive = await self.get_annotation('true_positive')
-                true_positive.to_csv('../retrieved_data/annotation_true_positive.tsv', sep='\t', index=False)
+                true_positive.to_csv(f'../retrieved_data/{self._cc_code}_annotation_true_positive.tsv', sep='\t', index=False)
                 false_positive = await self.get_annotation('false_positive')
-                false_positive.to_csv('../retrieved_data/annotation_false_positive.tsv', sep='\t', index=False)
+                false_positive.to_csv(f'../retrieved_data/{self._cc_code}_annotation_false_positive.tsv', sep='\t', index=False)
                 logger.info(f'Annotation files saved')
                 end_time = datetime.now()
                 logger.info(f'Update is done. Time: {end_time-start_time}')
