@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "peeling"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
   { name="HHMI Janelia", email="peeling@janelia.hhmi.org" },
 ]
@@ -58,6 +58,9 @@ where = ["."]
 include = ["peeling"]  # ["*"] by default
 exclude = []  # empty by default
 namespaces = false  # true by default
+
+[project.urls]
+Homepage = "https://github.com/JaneliaSciComp/peeling"
 
 [project.scripts]
 peeling = 'peeling.main:main'
