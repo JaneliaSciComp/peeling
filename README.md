@@ -34,9 +34,9 @@ The order of the three required arguments should NOT be changed.
 | Content Cell |          Content Cell          |          Content Cell          |          Content Cell          |          Content Cell          |          Content Cell          |          Content Cell          |
 
 #### Note
-The basic usage will communicate with the UniProt website to map the IDs to the latest version, and get the annotation data of surface proteins (TP) and introcellular proteins (FP). As of our testing, it will take dozens of seconds to minutes for the process. 
+The basic usage will communicate with the UniProt website to map the provided IDs to their latest version, and get the annotation data of surface proteins (TP) and introcellular proteins (FP). Our testing shows that this can take dozens of seconds or minutes to complete.
 
-Therefore, it is recommended to save the retrieved data when first time run it, and use the locally saved data for the following runs, which will reduce the run time to seconds. If using local annotation files, PEELing does id mapping by default. To disable id mapping for local annotation files specify -n/--nomap. Remember to update the retrieved data periodically.
+Therefore, it is recommended to save the retrieved data after the first run, and use the locally saved data for the following runs, which will reduce the run time to seconds. If using local annotation files, PEELing does id mapping by default. To disable id mapping for local annotation files specify -n/--nomap. Note: Remember to update the retrieved data periodically.
 ```
 # To save the retrieved data, specify -a/--cache
 peeling mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates --cache
@@ -64,9 +64,9 @@ peeling mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates -p 
 
 -i, --ids    Latest_ids file directory including filename, e.g. data/id_mapping.tsv
 
--s, --surface    Annotation_surface file directory including filename, e.g. data/annotation_surface.tsv
+--tp, --true-positive   path to true positive annotation file, e.g. data/annotation_true_positive.tsv
 
--c, --cyto    Annotation_cyto file directory including filename, e.g. data/annotation_cyto.tsv
+--fp, --false-positive  path to false positive annotation file, e.g. data/annotation_false_positive.tsv
 
 -a, --cache    Save the data retrieved from UniProt on the local computer, true if specified
 
@@ -75,3 +75,7 @@ peeling mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates -p 
 -n, --nomap    No id mapping for local annotation files, true if specified
 
 -p, --panther    The organism from which the mass spec data is made, a required input for Panther enrichment analysis. Please refer to Panther's API page http://pantherdb.org/services/oai/pantherdb/supportedgenomes for supported organism. Choose the corresponding 'long_names', and wrap it by quotes, e.g. 'Homo sapiens'
+
+--cc, --cellular_compartment    Choose between: cs - cell surface [default], mt - mitochondria, nu - nucleus or ot - other. If other is chosen, the true positive (--tp) and false positive (--fp) files must be specified
+
+-v --verbose    Enables verbose debugging output

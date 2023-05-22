@@ -1,10 +1,10 @@
-from peeling.processor import Processor
 import os
 from datetime import datetime
 import pandas as pd
 import logging
 import asyncio
 import matplotlib.pyplot as plt
+from peeling.processor import Processor
 
 
 logger = logging.getLogger('peeling')
@@ -33,24 +33,24 @@ class CliProcessor(Processor):
                 # logger.debug(f'before retrieve: {len(self.__ids)}')
                 to_retrieve = old_ids_set.difference(saved_ids_set)
                 # logger.debug(f'to retrieve: {len(to_retrieve)}')
-                
+
                 if len(to_retrieve) > 0:
                     old_ids = list(to_retrieve)
             retrieved_data = await self._get_uniprot_communicator().get_latest_id(old_ids)
             self.__ids = pd.concat([self.__ids, retrieved_data])
             # logger.debug(f'after concat: {len(self.__ids)}')
-              
+
         return self.__ids
 
-        
+
     # implement abstract method
     async def _get_annotation_data(self, type):
         '''
-        type: 'surface' or 'cyto'
+        type: 'true_positive' or 'false_positive'
         '''
-        if type == 'surface':
-            if self._get_user_input_reader().get_annotation_surface_filename() is not None: 
-                annotation = self._get_user_input_reader().get_annotation_surface() 
+        if type == 'true_positive':
+            if self._get_user_input_reader().get_true_positive_filename() is not None:
+                annotation = self._get_user_input_reader().get_annotation_true_positive()
                 annotation = pd.DataFrame(annotation.iloc[:, 0])
                 if not self._get_user_input_reader().get_id_mapping():
                     annotation.columns = ['From']
@@ -60,14 +60,14 @@ class CliProcessor(Processor):
                     annotation = pd.DataFrame(annotation.iloc[:, 0])
                 annotation.columns = ['Entry']
             else: # retrieve annotation file from UniProt
-                annotation = await self._get_uniprot_communicator().get_annotation('surface')
+                annotation = await self._get_uniprot_communicator().get_annotation('true_positive')
                 annotation.dropna(subset=['Entry'], axis=0, how='any', inplace=True)
                 if self._get_user_input_reader().get_save():
-                    annotation.to_csv(f'{self.__path}/annotation_surface.tsv', sep='\t', index=False)
+                    annotation.to_csv(f'{self.__path}/annotation_true_positive.tsv', sep='\t', index=False)
                 annotation = annotation[['Entry']]
         else:
-            if self._get_user_input_reader().get_annotation_cyto_filename() is not None: 
-                annotation = self._get_user_input_reader().get_annotation_cyto() 
+            if self._get_user_input_reader().get_false_positive_filename() is not None:
+                annotation = self._get_user_input_reader().get_annotation_false_positive()
                 annotation = pd.DataFrame(annotation.iloc[:, 0])
                 if not self._get_user_input_reader().get_id_mapping():
                     annotation.columns = ['From']
@@ -77,12 +77,12 @@ class CliProcessor(Processor):
                     annotation = pd.DataFrame(annotation.iloc[:, 0])
                 annotation.columns = ['Entry']
             else: # retrieve annotation file from UniProt
-                annotation = await self._get_uniprot_communicator().get_annotation('cyto')
+                annotation = await self._get_uniprot_communicator().get_annotation('false_positive')
                 annotation.dropna(subset=['Entry'], axis=0, how='any', inplace=True)
                 if self._get_user_input_reader().get_save():
-                    annotation.to_csv(f'{self.__path}/annotation_cyto.tsv', sep='\t', index=False)
+                    annotation.to_csv(f'{self.__path}/annotation_false_positive.tsv', sep='\t', index=False)
                 annotation = annotation[['Entry']]
-       
+
         return annotation
 
 
@@ -96,9 +96,9 @@ class CliProcessor(Processor):
         parent_path = os.path.join(self._get_user_input_reader().get_output_directory(), str(datetime.now()).replace(':','-').replace(' ','_'))
         if self._get_user_input_reader().get_save():
             retrieved_path = os.path.join(parent_path, "retrieved_data")
-            try: 
-                os.makedirs(retrieved_path, exist_ok=True) 
-            except OSError as error: 
+            try:
+                os.makedirs(retrieved_path, exist_ok=True)
+            except OSError as error:
                 logger.error(error)
         else:
             retrieved_path = None
@@ -112,16 +112,19 @@ class CliProcessor(Processor):
             ids = self._get_user_input_reader().get_latest_ids_filename()
             if ids is not None:
                 f.write(f'Latest_ids file: {ids}\n')
-            surface = self._get_user_input_reader().get_annotation_surface_filename()
-            if surface is not None:
-                f.write(f'Annotation_surface file: {surface}\n')
-            cyto = self._get_user_input_reader().get_annotation_cyto_filename()
-            if cyto is not None:
-                f.write(f'Annotation_cyto file: {cyto}\n')
+
+            true_positive = self._get_user_input_reader().get_true_positive_filename()
+            if true_positive is not None:
+                f.write(f'Annotation_true_positive file: {true_positive}\n')
+
+            false_positive = self._get_user_input_reader().get_false_positive_filename()
+            if false_positive is not None:
+                f.write(f'Annotation_false_positive file: {false_positive}\n')
+
             no_id_mapping = self._get_user_input_reader().get_id_mapping()
-            if (surface is not None) or (cyto is not None):
+            if (true_positive is not None) or (false_positive is not None):
                 f.write(f'No id mapping for local annotations: {no_id_mapping}\n')
-   
+
 
     # implement abstract method
     def start(self):
@@ -133,7 +136,7 @@ class CliProcessor(Processor):
             self.__ids.to_csv(self.__path+'/latest_ids.tsv', sep='\t', index=False)
         self._write_args(parent_path)
         return parent_path
-    
 
-    def _set_surface_proteins_raw_data(self, df):
+
+    def _set_true_positive_proteins_raw_data(self, df):
         return

@@ -1,5 +1,5 @@
-from peeling.pantherprocessor import PantherProcessor
 import logging
+from peeling.pantherprocessor import PantherProcessor
 
 logger = logging.getLogger('peeling')
 
