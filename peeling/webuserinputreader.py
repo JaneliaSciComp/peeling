@@ -2,6 +2,7 @@ from fastapi import UploadFile
 import pandas as pd
 import csv
 import logging
+from io import StringIO
 from peeling.userinputreader import UserInputReader
 
 logger = logging.getLogger('peeling')
@@ -15,9 +16,7 @@ class WebUserInputReader(UserInputReader):
 
     async def __decode_uploadFile(self):
         bytes = await self.__mass_file.read()
-        lines = [line for line in bytes.decode("utf-8").split("\n") if line]
-        reader = csv.DictReader(lines, delimiter="\t", quotechar='"')
-        df = pd.DataFrame(list(reader))
+        df = pd.read_table(StringIO(bytes.decode("utf-8")))
         logger.debug(f'\n{df.head()}')
         self._check_file(df)
         return df
