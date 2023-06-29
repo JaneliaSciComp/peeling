@@ -51,7 +51,8 @@ class WebProcessor(Processor):
         type: 'true_positive' or 'false_positive'
         '''
         annotation = await self._get_uniprot_communicator().get_annotation(type)
-        # logger.debug(f'\n{annotation.head()}')
+        annotation.columns = ['Entry']
+        logger.debug(f'\n{annotation.head()}')
         return annotation.copy()
 
 

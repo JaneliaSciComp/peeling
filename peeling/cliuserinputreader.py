@@ -69,6 +69,7 @@ class CliUserInputReader(UserInputReader):
 
 
     def get_annotation_true_positive(self):
+        logger.debug('Reading from true positive file: %s' % (self.__true_positive_filename))
         df = self.__read_file(self.__true_positive_filename)
         try:
             assert(df.shape[1] >= 1), 'Annotation_true_positive file should have at least one column containing ids of proteins in your selected cellular compartment'
@@ -80,6 +81,7 @@ class CliUserInputReader(UserInputReader):
 
 
     def get_annotation_false_positive(self):
+        logger.debug('Reading from false positive file: %s' % (self.__false_positive_filename))
         df = self.__read_file(self.__false_positive_filename)
         try:
             assert(df.shape[1] >= 1), 'Annotation_false_positive file should have at least one column containing ids of proteins that are not found in your selected cellular compartment'

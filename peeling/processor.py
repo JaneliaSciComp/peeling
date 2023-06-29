@@ -83,6 +83,8 @@ class Processor(ABC):
         '''
         type: 'true_positive' or 'false_positive'
         '''
+        logger.debug(f'Adding annotation_{type} started.')
+        logger.debug(f'\n{annotation.head()}')
         annotation['Add'] = 1
         annotation.drop_duplicates(keep='first', inplace=True)
         annotation.dropna(axis=0, how='any', inplace=True)
