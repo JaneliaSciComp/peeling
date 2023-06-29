@@ -21,13 +21,13 @@ class CliUserInputReader(UserInputReader):
         try:
             df = pd.read_table(filename, sep='\t', header=0)
         except UnicodeDecodeError as e1:
-            logger.error(e1) 
+            logger.error(e1)
             logger.error('Check the input file is tab delimited (.tsv)')
             raise
         except FileNotFoundError as e2:
             logger.error(e2)
             raise
-        
+
         self._check_file(df)
         return df
 
@@ -38,20 +38,20 @@ class CliUserInputReader(UserInputReader):
         self._check_mass_spec_file(data)
         logger.info('Read in %d rows and %d columns from mass spec data' % data.shape)
         return data
-    
+
 
     # implement abstract method
     def get_mass_spec_filename(self):
         return self.__mass_filename
-    
+
 
     def get_latest_ids_filename(self):
         return self.__ids_filename
-    
+
 
     def get_true_positive_filename(self):
         return self.__true_positive_filename
-    
+
 
     def get_false_positive_filename(self):
         return self.__false_positive_filename
@@ -66,7 +66,7 @@ class CliUserInputReader(UserInputReader):
         except AssertionError as e:
             logger.error(e)
             raise
-        
+
 
     def get_annotation_true_positive(self):
         df = self.__read_file(self.__true_positive_filename)
@@ -77,7 +77,7 @@ class CliUserInputReader(UserInputReader):
         except AssertionError as e:
             logger.error(e)
             raise
-       
+
 
     def get_annotation_false_positive(self):
         df = self.__read_file(self.__false_positive_filename)
@@ -89,14 +89,14 @@ class CliUserInputReader(UserInputReader):
             logger.error(e)
             raise
 
-    
+
     def get_output_directory(self):
         return self.__output_directory
 
 
     def get_save(self):
         return self.__save
-    
+
 
     def get_id_mapping(self):
         return self.__no_id_mapping

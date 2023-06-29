@@ -99,7 +99,6 @@ def main():
     end_time = datetime.now()
     logger.info(f'{end_time} Analysis finished! Time: {end_time - start_time}')
 
-    
 
 if __name__ == "__main__":
     main()
