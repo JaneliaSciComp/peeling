@@ -9,10 +9,10 @@ logger = logging.getLogger('peeling')
 
 
 class WebUniProtCommunicator(UniProtCommunicator):
-    def __init__(self, cache, cellular_compartment, tp_data=None, fp_data=None):
+    def __init__(self, cache, cellular_compartment, track_update, tp_data=None, fp_data=None):
         super().__init__(cache, cellular_compartment)
         self.__ids = None
-        self.__track_update = 0
+        self.__track_update = track_update
         if isinstance(tp_data, pd.DataFrame) and isinstance(fp_data, pd.DataFrame):
             self._annotation_true_positive = tp_data
             self._annotation_false_positive = fp_data
@@ -110,7 +110,7 @@ class WebUniProtCommunicator(UniProtCommunicator):
         if self.__track_update == 0:
             try:
                 await self.__initialize()
-                self.__track_update += 1
+                # self.__track_update += 1
             except Exception as e:
                 logger.error(e)
         else:
@@ -133,7 +133,7 @@ class WebUniProtCommunicator(UniProtCommunicator):
                 logger.info(f'Annotation files saved')
                 end_time = datetime.now()
                 logger.info(f'Update is done. Time: {end_time-start_time}')
-                self.__track_update += 1
+                # self.__track_update += 1
             except Exception as e:
                 logger.error(e)
 

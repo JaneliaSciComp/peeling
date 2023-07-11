@@ -4,9 +4,15 @@
 ### Introduction
 Molecular compartmentalization is vital for cellular physiology. Spatially-resolved proteomics allows biologists to survey protein composition and dynamics with subcellular resolution. Here, we present **PEELing** (***p***roteome ***e***xtraction from ***e***nzymatic ***l***abel***ing*** data), an integrated package and user-friendly web service for analyzing spatially-resolved proteomics data. PEELing assesses data quality using curated or user-defined references, performs cutoff analysis to remove contaminants, connects to databases for functional annotation, and generates data visualizations—providing a streamlined and reproducible workflow to explore spatially-resolved proteomics data.
 
-This `PEELing` program provides an automated, standardized, and easy-to-use analysis pipeline for iPEEL or any other cell-surface proteomics data. PEELing evaluates data quality using curated [Swiss-Prot](https://www.sib.swiss/swiss-prot)  references, performs cut-off analysis to remove contaminants (modified from [Hung et al., 2014](https://pubmed.ncbi.nlm.nih.gov/25002142/) — `PMID:  25002142`), connects to [UniProt](https://www.uniprot.org/) and [Panther](http://www.pantherdb.org/) databases for functional annotation, and generates data visualizations. Together with iPEEL transgenic tools (The Jackson Laboratory: 037697, 037698; Bloomington Drosophila Stock Center: 8763, 9906, 9908), PEELing enables a complete pipeline, from wet lab method to data analysis, for in situ cell-surface proteomics.
-
 `PEELing` also provides a web portal. Please refer to [link](http://peeling.janelia.org)
+
+
+
+### Citation
+Manuscript preprint: [https://www.biorxiv.org/content/10.1101/2023.04.21.537871](https://www.biorxiv.org/content/10.1101/2023.04.21.537871)
+
+Please note that this bioRxiv preprint will be updated as we add new functionalities to PEELing.
+
 
 
 ### Installation
@@ -34,7 +40,7 @@ The order of the three required arguments should NOT be changed.
 | Content Cell |          Content Cell          |          Content Cell          |          Content Cell          |          Content Cell          |          Content Cell          |          Content Cell          |
 
 #### Note
-The basic usage will communicate with the UniProt website to map the provided IDs to their latest version, and get the annotation data of surface proteins (TP) and introcellular proteins (FP). Our testing shows that this can take dozens of seconds or minutes to complete.
+The basic usage will communicate with the UniProt website to map the provided IDs to their latest version, and get the annotation data of true positive proteins (TP) and false positive proteins (FP). Our testing shows that this can take dozens of seconds or minutes to complete.
 
 Therefore, it is recommended to save the retrieved data after the first run, and use the locally saved data for the following runs, which will reduce the run time to seconds. If using local annotation files, PEELing does id mapping by default. To disable id mapping for local annotation files specify -n/--nomap. Note: Remember to update the retrieved data periodically.
 ```
@@ -42,7 +48,7 @@ Therefore, it is recommended to save the retrieved data after the first run, and
 peeling mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates --cache
 
 # To use locally saved data, specify the directories
-peeling mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates --ids latest_ids_dir --surface annotation_surface_dir --cyto annotation_cyto_dir --nomap
+peeling mass_spec_dir num_of_nonlabelled_controls num_of_labelled_replicates --ids latest_ids_dir --tp annotation_true_positive_dir --fp annotation_false_positive_dir --nomap
 ```
 
 
