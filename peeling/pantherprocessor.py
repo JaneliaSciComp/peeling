@@ -33,6 +33,9 @@ class PantherProcessor(ABC):
     async def __check_response(self, response):
         try:
             await response.aread()
+            if response.status_code >= 300 and response.status_code < 400:
+                logger.debug(response.headers)
+                return
             response.raise_for_status()
         except httpx.HTTPStatusError:
             logger.info(response.json())
@@ -40,7 +43,7 @@ class PantherProcessor(ABC):
     
 
     def __make_url_enrich(self, annot_dataset):
-        base_url = "http://pantherdb.org/services/oai/pantherdb/enrich/overrep?"
+        base_url = "https://pantherdb.org/services/oai/pantherdb/enrich/overrep?"
         parsed = urlparse(base_url) 
         query = parse_qs(parsed.query)
         query['geneInputList'] = self.__proteins
@@ -56,10 +59,10 @@ class PantherProcessor(ABC):
     async def __submit(self, url):
         retry = 0
         while retry < API_RETRY:
-            if retry > 1:
+            if retry >= 1:
                 logger.info('Retry')
             try:
-                response = await self.__client.get(url)
+                response = await self.__client.get(url, follow_redirects=True)
                 return response
             except Exception as e:
                 logger.error('Something wrong with Panther')
@@ -103,7 +106,7 @@ class PantherProcessor(ABC):
         start_time = datetime.now()
         #logger.debug('Communicating with Panther for supported organisms ...')
         try:
-            url = 'http://pantherdb.org/services/oai/pantherdb/supportedgenomes'
+            url = 'https://pantherdb.org/services/oai/pantherdb/supportedgenomes'
             response = await self.__submit(url)
             organism_dict = self.__format_organism(response)
             logger.info(f'Retriving organisms is done. Time: {datetime.now()-start_time}')
@@ -154,12 +157,12 @@ class PantherProcessor(ABC):
 
     @abstractmethod
     def start(self):
-        raise NotImplementedError()
+        raise NotImplemented()
 
     
     @abstractmethod
     def _write_args(self):
-        raise NotImplementedError()
+        raise NotImplemented()
     
     
     def _set_organism_id(self, id):
