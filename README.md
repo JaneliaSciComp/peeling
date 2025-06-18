@@ -4,8 +4,8 @@
 ### Introduction
 Molecular compartmentalization is vital for cellular physiology. Spatially-resolved proteomics allows biologists to survey protein composition and dynamics with subcellular resolution. Here, we present **PEELing** (***p***roteome ***e***xtraction from ***e***nzymatic ***l***abel***ing*** data), an integrated package and user-friendly web service for analyzing spatially-resolved proteomics data. PEELing assesses data quality using curated or user-defined references, performs cutoff analysis to remove contaminants, connects to databases for functional annotation, and generates data visualizations—providing a streamlined and reproducible workflow to explore spatially-resolved proteomics data.
 
-`PEELing` also provides a web portal. Please refer to [http://peeling.janelia.org](http://peeling.janelia.org)
-
+`PEELing` also provides a web portal at [http://peeling.janelia.org](http://peeling.janelia.org)
+ - the website source code can be found at [https://github.com/JaneliaSciComp/PEELing_web](https://github.com/JaneliaSciComp/PEELing_web)
 
 
 ### Citation
