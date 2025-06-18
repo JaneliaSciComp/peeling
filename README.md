@@ -1,5 +1,7 @@
 # PEELing
 
+[![DOI](https://zenodo.org/badge/545043546.svg)](https://doi.org/10.5281/zenodo.15692433)
+
 
 ### Introduction
 Molecular compartmentalization is vital for cellular physiology. Spatially-resolved proteomics allows biologists to survey protein composition and dynamics with subcellular resolution. Here, we present **PEELing** (***p***roteome ***e***xtraction from ***e***nzymatic ***l***abel***ing*** data), an integrated package and user-friendly web service for analyzing spatially-resolved proteomics data. PEELing assesses data quality using curated or user-defined references, performs cutoff analysis to remove contaminants, connects to databases for functional annotation, and generates data visualizations—providing a streamlined and reproducible workflow to explore spatially-resolved proteomics data.
