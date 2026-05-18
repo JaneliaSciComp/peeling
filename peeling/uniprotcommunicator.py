@@ -26,6 +26,11 @@ API_URL = "https://rest.uniprot.org"
 
 CHUNK_SIZE = 2000 #TODO: tune CHUNK_SIZE
 
+
+class UniProtServiceError(Exception):
+    """Raised when UniProt's ID-mapping service is unreachable or returns errors for every chunk."""
+
+
 class UniProtCommunicator(ABC):
     def __init__(self, cache=False, cellular_compartment='cs'):
         self.__save = cache
@@ -183,6 +188,12 @@ class UniProtCommunicator(ABC):
             meta['no_id_mapping'] = no_mapping_ids_set
             logger.info(f'Retrieved {retrieved_ids} ids, {len(no_mapping_ids_set)} ids didn\'t find id mapping data, {failed_ids} ids failed for id mapping')
             logger.info(f'{datetime.now()-start_time} for id mapping')
+
+            if not results_list_filtered:
+                raise UniProtServiceError(
+                    'UniProt ID mapping service is currently unavailable — '
+                    f'all {failed_ids} ids failed to map. Please try again later.'
+                )
 
             return pd.concat(results_list_filtered)
         except Exception:
