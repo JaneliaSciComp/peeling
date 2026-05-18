@@ -64,3 +64,17 @@ Homepage = "https://github.com/JaneliaSciComp/peeling"
 
 [project.scripts]
 peeling = 'peeling.main:main'
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["osx-arm64"]
+
+[tool.pixi.dependencies]
+python = "3.10.*"
+
+[tool.pixi.pypi-dependencies]
+peeling = { path = ".", editable = true }
+build = "*"
+twine = "*"
+
+[tool.pixi.tasks]
